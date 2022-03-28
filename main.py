@@ -8,21 +8,23 @@ import numpy as np
 
 
 def create_global_log_file_throughput_plot(data: Dict):
+    plt.figure(figsize=(10, 3), dpi=300)
+
     # Convert the files entries to a 2d array.
     files = data["log_data"]["global"]["files"]
     array_data = [f["count"] for f in files]
     numpy_array = np.array(array_data)
 
     # Plot the figure as a color mesh plot.
-    plt.figure(figsize=(10, 5), dpi=300)
     ax = plt.axes()
     c = ax.pcolormesh(numpy_array, cmap="Blues")
-    ax.set_title(f"`{data['model']['name']}' Logging Throughput")
-    plt.xlabel("Time (ms)")
-    plt.ylabel("File number")
-    plt.colorbar(c, ax=ax)
-    plt.gca().invert_yaxis()
-    # tikzplotlib.save("plot.tex", dpi=300)
+    ax.set_title(f"\"{data['model']['name']}\" Logging Throughput (Global)")
+    ax.set_xlabel("Time (ms)")
+    ax.set_ylabel("File number")
+    ax.invert_yaxis()
+    plt.colorbar(c, ax=ax, pad=0.015)
+
+    plt.tight_layout()
     plt.show()
 
 
@@ -30,7 +32,7 @@ def create_thread_grouped_log_file_throughput_plot(data: Dict):
     threads = data["log_data"]["threads"]
 
     # Put all threads into one figure.
-    fig, axes = plt.subplots(len(threads), sharex="all", sharey="all", figsize=(10, 4 * len(threads)), dpi=300)
+    fig, axes = plt.subplots(len(threads), figsize=(10, 3 * len(threads)), dpi=300)
 
     # Convert all the data to 2d numpy arrays and keep the max value range.
     array_data_map = dict()
@@ -42,20 +44,17 @@ def create_thread_grouped_log_file_throughput_plot(data: Dict):
         max_value = max(max_value, np.amax(array_data_map[thread]))
 
     # Plot each thread individually.
-    c = None
     for i, thread in enumerate(threads):
         # Plot the figure as a color mesh plot.
         ax = axes[i]
         c = ax.pcolormesh(array_data_map[thread], cmap="Blues", vmin=0, vmax=max_value)
-        ax.set_title(f"{thread}")
+        ax.set_title(f"\"{data['model']['name']}\" Logging Throughput ({thread})")
+        ax.set_xlabel("Time (ms)")
+        ax.set_ylabel("File number")
         ax.invert_yaxis()
+        fig.colorbar(c, ax=ax, pad=0.015)
 
-    plt.xlabel("Time (ms)")
-    fig.supylabel("File number")
-
-    fig.suptitle(f"`{data['model']['name']}' Logging Throughput")
-    fig.colorbar(c, ax=axes.ravel().tolist())
-
+    plt.tight_layout()
     plt.show()
 
 
