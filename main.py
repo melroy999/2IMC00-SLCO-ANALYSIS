@@ -1,61 +1,11 @@
 import json
 from os import path
-from typing import Dict, List
+from typing import Dict, Tuple
 
-import tikzplotlib
-import matplotlib.pyplot as plt
-import numpy as np
+import networkx as nx
 
-
-def create_global_log_file_throughput_plot(data: Dict):
-    plt.figure(figsize=(10, 3), dpi=300)
-
-    # Convert the files entries to a 2d array.
-    files = data["log_data"]["global"]["files"]
-    array_data = [f["count"] for f in files]
-    numpy_array = np.array(array_data)
-
-    # Plot the figure as a color mesh plot.
-    ax = plt.axes()
-    c = ax.pcolormesh(numpy_array, cmap="Blues")
-    ax.set_title(f"\"{data['model']['name']}\" Logging Throughput (Global)")
-    ax.set_xlabel("Time (ms)")
-    ax.set_ylabel("File number")
-    ax.invert_yaxis()
-    plt.colorbar(c, ax=ax, pad=0.015)
-
-    plt.tight_layout()
-    plt.show()
-
-
-def create_thread_grouped_log_file_throughput_plot(data: Dict):
-    threads = data["log_data"]["threads"]
-
-    # Put all threads into one figure.
-    fig, axes = plt.subplots(len(threads), figsize=(10, 3 * len(threads)), dpi=300)
-
-    # Convert all the data to 2d numpy arrays and keep the max value range.
-    array_data_map = dict()
-    max_value = 0
-    for thread in threads:
-        files = threads[thread]["files"]
-        array_data = [f["count"] for f in files]
-        array_data_map[thread] = np.array(array_data)
-        max_value = max(max_value, np.amax(array_data_map[thread]))
-
-    # Plot each thread individually.
-    for i, thread in enumerate(threads):
-        # Plot the figure as a color mesh plot.
-        ax = axes[i]
-        c = ax.pcolormesh(array_data_map[thread], cmap="Blues", vmin=0, vmax=max_value)
-        ax.set_title(f"\"{data['model']['name']}\" Logging Throughput ({thread})")
-        ax.set_xlabel("Time (ms)")
-        ax.set_ylabel("File number")
-        ax.invert_yaxis()
-        fig.colorbar(c, ax=ax, pad=0.015)
-
-    plt.tight_layout()
-    plt.show()
+from plotting import create_global_log_file_throughput_plot, create_thread_grouped_log_file_throughput_plot, \
+    render_graph, create_succession_heat_map_plot
 
 
 def import_data(target: str) -> Dict:
@@ -95,10 +45,51 @@ def preprocess_log_data(log_data: Dict):
         preprocess_log_data_entry(entry)
 
 
+def obscure_graph_node_name(node: str):
+    """Obscure the individual identity of the target node and replace it with an asterisks."""
+    node_thread, node_id, node_type = node.split(".")
+    return f"{node_thread}.{node_id[0]}*.{node_type}"
+
+
+def obscure_succession_graph_nodes(graph: nx.DiGraph) -> nx.DiGraph:
+    """Create a graph that obscures the individual identities of the contained nodes."""
+    node_name_mapping = {n: obscure_graph_node_name(n) for n in graph.nodes}
+    obscured_graph = nx.DiGraph()
+    for u, v in graph.edges:
+        source = node_name_mapping[u]
+        target = node_name_mapping[v]
+        if obscured_graph.has_edge(source, target):
+            obscured_graph[source][target]["weight"] += graph[u][v]["weight"]
+        else:
+            obscured_graph.add_edge(source, target, weight=graph[u][v]["weight"])
+    return obscured_graph
+
+
+def preprocess_message_data_succession_graph(entry_data: Dict):
+    """Convert the mapping from node pairs to count to a graph object."""
+    edges = entry_data["graph"]
+    graph = nx.DiGraph()
+
+    # Create the edges.
+    for edge, count in edges.items():
+        source, target = edge.split("~")
+        graph.add_edge(source, target, weight=count)
+
+    graph = obscure_succession_graph_nodes(graph)
+    entry_data["succession_graph"] = graph
+    del entry_data["graph"]
+
+
+def preprocess_message_data(message_data: Dict):
+    """Preprocess the message data entry in the JSON hierarchy."""
+    preprocess_message_data_succession_graph(message_data["global"])
+
+
 def preprocess_data(data: Dict):
     """Preprocess the json data."""
     # Preprocess the log data such that it can be used more easily in figures and graphs.
     preprocess_log_data(data["log_data"])
+    preprocess_message_data(data["message_data"])
 
     return data
 
@@ -109,6 +100,7 @@ def analyze_model(target: str):
     preprocessed_data = preprocess_data(model_data)
     create_global_log_file_throughput_plot(preprocessed_data)
     create_thread_grouped_log_file_throughput_plot(preprocessed_data)
+    create_succession_heat_map_plot(preprocessed_data)
 
 
 if __name__ == '__main__':
