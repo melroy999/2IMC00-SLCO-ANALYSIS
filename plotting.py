@@ -1,4 +1,5 @@
-from typing import Dict
+import copy
+from typing import Dict, List, Tuple
 
 import numpy as np
 
@@ -61,24 +62,40 @@ def create_thread_grouped_log_file_throughput_plot(data: Dict):
     plt.show()
 
 
+type_order_map = {
+        "D*.O": 0,
+        "T*.O": 1,
+        "T*.S": 2,
+        "T*.F": 3,
+        "D*.S": 4,
+        "D*.F": 5,
+    }
+
+
+def get_succession_heat_map_plot_node_order_key(node: str) -> Tuple[str, int]:
+    """Get a key that can be used to reorder the list of nodes to the desired specifications."""
+    node_thread, node_type = node.split(".", 1)
+    return node_thread, type_order_map[node_type]
+
+
 def create_succession_heat_map_plot(data: Dict):
     """Plot the succession graph as a heat map."""
+    # Create an order in which to view the nodes and get the appropriate graph data.
     graph = data["message_data"]["global"]["succession_graph"]
-
-    # Create an order in which to view the nodes.
-    sorted_nodes = sorted(graph.nodes)
-
+    sorted_nodes = sorted(graph.nodes, key=lambda x: get_succession_heat_map_plot_node_order_key(x))
     graph_data = nx.to_numpy_array(graph, nodelist=sorted_nodes, dtype=np.dtype([("weight", int)]), weight=None)
 
+    # Create an image plot.
     fig, ax = plt.subplots(1, figsize=(9, 9), dpi=300)
-    im = ax.imshow(graph_data["weight"], cmap="Blues")
+    cmap = copy.copy(plt.get_cmap("Blues"))
+    cmap.set_under("black")
+    im = ax.imshow(graph_data["weight"], cmap=cmap, vmin=1)
 
     # Show all ticks and label them with the respective list entries
     ax.set_xticks(np.arange(len(sorted_nodes)), labels=sorted_nodes, fontname="monospace")
     ax.set_yticks(np.arange(len(sorted_nodes)), labels=sorted_nodes, fontname="monospace")
     ax.set_xlabel("To")
     ax.set_ylabel("From")
-    ax.set_aspect("equal")
 
     # Rotate the tick labels and set their alignment.
     plt.setp(ax.get_xticklabels(), rotation=90, ha="right", rotation_mode="anchor")
@@ -90,7 +107,7 @@ def create_succession_heat_map_plot(data: Dict):
     #                        ha="center", va="center", color="w")
 
     ax.set_title(f"\"{data['model']['name']}\" Succession Heat Map")
-    plt.colorbar(im, ax=ax, fraction=0.047)
+    plt.colorbar(im, ax=ax, fraction=0.04)
 
     plt.tight_layout()
     plt.show()
