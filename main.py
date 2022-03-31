@@ -2,6 +2,7 @@ import json
 from os import path, listdir
 from typing import Dict
 
+import numpy as np
 import pandas as pd
 
 from analyzation import analyze_data
@@ -39,10 +40,29 @@ def analyze_model(target_model: str):
     )
     aggregate_count_data.sort_index(inplace=True)
 
+    # Create statistical data.
+    aggregate_count_data["count_mean"] = aggregate_count_data[
+        [f"count_{i}" for i, _ in enumerate(run_results)]
+    ].mean(axis=1)
+    aggregate_count_data["count_std"] = aggregate_count_data[
+        [f"count_{i}" for i, _ in enumerate(run_results)]
+    ].std(axis=1)
+    aggregate_count_data["count_s_mean"] = aggregate_count_data[
+        [f"count_s_{i}" for i, _ in enumerate(run_results)]
+    ].mean(axis=1)
+    aggregate_count_data["count_s_std"] = aggregate_count_data[
+        [f"count_s_{i}" for i, _ in enumerate(run_results)]
+    ].std(axis=1)
+
+    correlation_table = np.array([
+        [
+            aggregate_count_data[f"count_{i}"].corr(aggregate_count_data[f"count_{j}"]) for j, _ in enumerate(run_results)
+        ] for i, _ in enumerate(run_results)
+    ])
+
     # Analyze the data.
     for data in run_results:
         analyze_data(data)
-
 
 if __name__ == '__main__':
     target_folders = {
