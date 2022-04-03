@@ -81,7 +81,7 @@ def get_succession_heat_map_plot_node_order_key(node: str) -> Tuple[str, int]:
 
 def get_succession_plot_color_map():
     """Get the color map to be used in the succession heat map plot."""
-    cmap = copy.copy(plt.get_cmap("cividis"))
+    cmap = copy.copy(plt.get_cmap("Blues"))
     new_colors = cmap(np.linspace(0, 1, 2**16))
     black = np.array([0, 0, 0, 1])
     new_colors[:1, :] = black
@@ -108,10 +108,11 @@ def obscure_succession_graph_nodes(graph: nx.DiGraph) -> nx.DiGraph:
     return obscured_graph
 
 
-def create_succession_heat_map_plot(data: Dict):
+# noinspection DuplicatedCode
+def create_succession_heat_map_plot(data: Dict, target="succession_graph"):
     """Plot the succession graph as a heat map."""
     # Get the appropriate graph data and obscure unneeded data.
-    graph = data["message_data"]["global"]["succession_graph"]
+    graph = data["message_data"]["global_data"][target]
     graph = obscure_succession_graph_nodes(graph)
 
     # Create an order in which to view the nodes.
@@ -127,7 +128,7 @@ def create_succession_heat_map_plot(data: Dict):
     ax.set_yticks(np.arange(len(sorted_nodes)), labels=sorted_nodes, fontname="monospace")
     ax.set_xlabel("Successor", labelpad=10)
     ax.set_ylabel("Source", labelpad=10)
-    ax.xaxis.set_label_position('top')
+    ax.xaxis.set_label_position("top")
 
     # Make the horizontal axes labeling appear on top.
     ax.tick_params(top=True, bottom=False, labeltop=True, labelbottom=False)
@@ -144,6 +145,76 @@ def create_succession_heat_map_plot(data: Dict):
     plt.show()
 
 
+def create_concurrency_graph(graph: nx.DiGraph) -> nx.DiGraph:
+    """Create the concurrency graph using the given transition succession graph."""
+    concurrency_graph = nx.DiGraph()
+    for u, v in graph.edges:
+        source_thread, source_id, source_type = u.split(".")
+        target_thread, target_id, target_type = v.split(".")
+
+        # Track the total weight.
+        if concurrency_graph.has_edge(source_thread, target_thread):
+            concurrency_graph[source_thread][target_thread]["total_weight"] += graph[u][v]["weight"]
+        else:
+            concurrency_graph.add_edge(source_thread, target_thread, weight=0, total_weight=graph[u][v]["weight"])
+
+        # Track concurrency weight. The following edges are deemed to be concurrent:
+        #   - Thread-x.T*.O --> Thread-y.T*.[O, S, F],  x != y
+        #   - Thread-x.T*.[S, F] --> Thread-y.T*.[S, F],  x != y
+        if source_thread != target_thread and (source_type == "O" or target_type == "S" or target_type == "F"):
+            concurrency_graph[source_thread][target_thread]["weight"] += graph[u][v]["weight"]
+
+    return concurrency_graph
+
+
+# noinspection DuplicatedCode
+def create_concurrency_heat_map_plot(data: Dict):
+    """Plot the concurrency graph as a heat map."""
+    graph = data["message_data"]["global_data"]["transition_succession_graph"]
+    graph = create_concurrency_graph(graph)
+
+    # Create an order in which to view the nodes.
+    sorted_nodes = sorted(graph.nodes)
+    graph_data = nx.to_numpy_array(
+        graph, nodelist=sorted_nodes, dtype=np.dtype([("weight", int), ("total_weight", int)]), weight=None
+    )
+
+    # Create an image plot.
+    fig, ax = plt.subplots(1, figsize=(5, 5), dpi=300)
+    im = ax.imshow(graph_data["weight"], cmap="Blues")
+
+    # Show all ticks and label them with the respective list entries
+    ax.set_xticks(np.arange(len(sorted_nodes)), labels=sorted_nodes, fontname="monospace")
+    ax.set_yticks(np.arange(len(sorted_nodes)), labels=sorted_nodes, fontname="monospace")
+    ax.set_xlabel("Successor", labelpad=10)
+    ax.set_ylabel("Source", labelpad=10)
+    ax.xaxis.set_label_position("top")
+
+    # Make the horizontal axes labeling appear on top.
+    ax.tick_params(top=True, bottom=False, labeltop=True, labelbottom=False)
+
+    # Rotate the tick labels and set their alignment.
+    plt.setp(ax.get_xticklabels(), rotation=-45, ha="right", rotation_mode="anchor")
+
+    # Add an overlay that shows the percentage of actions that were concurrent.
+    for i in range(len(sorted_nodes)):
+        for j in range(len(sorted_nodes)):
+            if i != j:
+                ax.text(
+                    j, i, f"{graph_data['weight'][j][i] / graph_data['total_weight'][j][i]:.2f}",
+                    ha="center", va="center", color="w"
+                )
+
+    # Add the title and color bar.
+    ax.set_title(f"\"{data['model']['name']}\" Concurrency Heat Map", pad=20)
+    color_bar = plt.colorbar(im, ax=ax, fraction=0.04, pad=0.025, orientation="horizontal")
+    color_bar.ax.set_xlabel("Count", labelpad=10)
+
+    plt.tight_layout()
+    plt.show()
+
+
+    pass
 
 
 def render_graph(graph: nx.DiGraph):

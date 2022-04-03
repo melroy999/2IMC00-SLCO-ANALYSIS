@@ -1,7 +1,8 @@
+import random
 from typing import Dict
 
 import networkx as nx
-from pandas import DataFrame
+import pandas as pd
 
 
 def preprocess_log_data_file_entry(file_data: Dict, array_size: int):
@@ -35,33 +36,44 @@ def preprocess_log_data(log_data: Dict):
         preprocess_log_data_entry(entry)
 
 
-def preprocess_message_data_succession_graph(entry_data: Dict):
-    """Convert the mapping from node pairs to count to a graph object."""
-    edges = entry_data["graph"]
+def create_succession_graph(edges: Dict[str, int]) -> nx.DiGraph:
+    """Create a succession graph with the given list of edges."""
     graph = nx.DiGraph()
 
     # Create the edges.
     for edge, count in edges.items():
         source, target = edge.split("~")
         graph.add_edge(source, target, weight=count)
+    return graph
 
-    entry_data["succession_graph"] = graph
-    del entry_data["graph"]
+
+def preprocess_message_data_graph(entry_data: Dict):
+    """Convert the mapping from node pairs to count to a graph object."""
+    # Convert the dictionary of node pairs to counts to a pandas table for correlation measurements.
+    entry_data["succession_table"] = pd.DataFrame.from_dict(
+        entry_data["succession_graph"], orient="index", columns=["count"]
+    )
+    entry_data["transition_succession_table"] = pd.DataFrame.from_dict(
+        entry_data["transition_succession_graph"], orient="index", columns=["count"]
+    )
+
+    # Convert the dictionary of node pairs to counts to a succession graph object.
+    entry_data["succession_graph"] = create_succession_graph(entry_data["succession_graph"])
+    entry_data["transition_succession_graph"] = create_succession_graph(entry_data["transition_succession_graph"])
 
 
 def preprocess_message_data_count(entry_data: Dict):
     """Convert the count dictionaries to pandas data frames."""
-    df = entry_data["count"] = DataFrame.from_dict(entry_data["count"], orient="index", columns=["count"])
-    df["count_s"] = df["count"] / df["count"].sum()
+    entry_data["event_count"] = pd.DataFrame.from_dict(entry_data["event_count"], orient="index", columns=["count"])
 
 
 def preprocess_message_data(message_data: Dict):
     """Preprocess the message data entry in the JSON hierarchy."""
-    preprocess_message_data_succession_graph(message_data["global"])
-    preprocess_message_data_count(message_data["global"])
+    preprocess_message_data_graph(message_data["global_data"])
+    preprocess_message_data_count(message_data["global_data"])
     for v in message_data["intervals"]:
-        preprocess_message_data_succession_graph(v)
-        preprocess_message_data_count(v)
+        preprocess_message_data_graph(v["data"])
+        preprocess_message_data_count(v["data"])
 
 
 def preprocess_data(data: Dict):
