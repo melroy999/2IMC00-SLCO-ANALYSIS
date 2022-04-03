@@ -214,9 +214,6 @@ def create_concurrency_heat_map_plot(data: Dict):
     plt.show()
 
 
-    pass
-
-
 def render_graph(graph: nx.DiGraph):
     """Visualize the given graph with the given data."""
     if len(graph.nodes) == 0:

@@ -76,7 +76,7 @@ def preprocess_message_data(message_data: Dict):
         preprocess_message_data_count(v["data"])
 
 
-def preprocess_data(data: Dict):
+def preprocess_logging_data(data: Dict):
     """Preprocess the json data."""
     # Preprocess the log data such that it can be used more easily in figures and graphs.
     preprocess_log_data(data["log_data"])

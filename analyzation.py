@@ -3,7 +3,6 @@ from typing import Dict, List, Callable
 import numpy as np
 import pandas
 import pandas as pd
-from scipy.stats import stats
 
 from plotting import create_global_log_file_throughput_plot, create_succession_heat_map_plot, \
     create_thread_grouped_log_file_throughput_plot, create_concurrency_heat_map_plot
@@ -17,7 +16,7 @@ def create_aggregate_table(results: List[Dict], target: Callable) -> pandas.Data
     # Use the selector to target the tables that need to be merged. Replace missing values with zeros.
     aggregate_data = pd.concat(
         [target(v).add_suffix(f"_{i}") for i, v in enumerate(results)], axis=1
-    ).fillna(0).sort_index()
+    ).fillna(.0).sort_index()
 
     # Add basic statistic columns for each original column.
     for column_name in column_names:
@@ -56,8 +55,8 @@ def create_manhattan_table(data: pandas.DataFrame, target_columns: List[str]) ->
     return pd.DataFrame(data=test_data, index=target_columns, columns=target_columns)
 
 
-def create_aggregate_data(results: List[Dict]):
-    """Create aggregate data for the given collection of results."""
+def create_logging_aggregate_data(results: List[Dict]) -> Dict:
+    """Create aggregate data for the given collection of results that are taken from log-based measurements."""
     # A dictionary containing all aggregate data.
     result = dict()
 
@@ -91,7 +90,27 @@ def create_aggregate_data(results: List[Dict]):
         transition_succession_count, list(transition_succession_count)[:len(results)]
     )
 
-    pass
+    return result
+
+
+def create_counting_aggregate_data(results: List[Dict]) -> Dict:
+    """Create aggregate data for the given collection of results that are taken from count-based measurements."""
+    # A dictionary containing all aggregate data.
+    result = dict()
+
+    # Concatenate the event and succession count data of the different runs.
+    def event_count_target(data):
+        return data["event_count"]
+    event_count = result["event_count"] = create_aggregate_table(
+        results, event_count_target
+    )
+
+    # Create correlation coefficient tables to check for differences in the data's trends.
+    a = result["event_count_corr"] = create_correlation_table(
+        event_count, list(event_count)[:len(results)]
+    )
+
+    return result
 
 
 def analyze_data(data: Dict):
