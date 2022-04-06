@@ -4,9 +4,24 @@ from typing import Dict
 import networkx as nx
 import pandas as pd
 
+from preprocessing.model import preprocess_model_data
+
 
 def preprocess_log_data_file_entry(file_data: Dict, array_size: int):
     """Preprocess a file entry within the JSON hierarchy using the given parameters."""
+    # Convert the count keys in the count array to integers.
+    frequency_data = dict()
+    for timestamp, count in file_data["count"].items():
+        frequency_data[int(timestamp)] = count
+    file_data["count"] = frequency_data
+
+    # Create a pandas data frame containing all count data--fill all missing indices with zero.
+    frequency_table = pd.DataFrame.from_dict(
+        file_data["count"], orient="index", columns=["frequency"]
+    ).reindex(list(range(file_data["start"], file_data["end"] + 1)))
+    frequency_table.sort_index(inplace=True)
+    file_data["frequency_table"] = frequency_table
+
     # Having the data as a mapping can be inconvenient--instead, it would be preferable to have fixed size arrays.
     # Adjust all entries to the starting time.
     start_time = int(file_data["start"])
@@ -81,4 +96,5 @@ def preprocess_logging_data(data: Dict):
     # Preprocess the log data such that it can be used more easily in figures and graphs.
     preprocess_log_data(data["log_data"])
     preprocess_message_data(data["message_data"])
+    preprocess_model_data(data["model"])
     return data

@@ -5,9 +5,10 @@ from typing import Dict, Tuple, List
 import pandas as pd
 
 from analyzation import analyze_data, create_logging_aggregate_data, create_counting_aggregate_data, \
-    create_correlation_table, create_manhattan_table
+    create_correlation_table, create_difference_sum_table, create_aggregate_table
 from preprocessing.counting import preprocess_counting_data
 from preprocessing.logging import preprocess_logging_data
+from validation import validate_source_model, validate_data_integrity, validate_logging_representability
 
 
 def import_data(target: str) -> Dict:
@@ -62,39 +63,61 @@ def import_counting_results(model_path: str) -> Tuple[List, Dict]:
     return run_results, aggregate_data
 
 
-def analyze_model(target_model: str):
-    """Analyze the results found for each run of the given model."""
+def import_model_results(target_model: str) -> Dict:
+    """Import all results of the given model."""
     # Find the folder that contains the model data and the list of associated result entries.
     model_path = path.join("results", target_model)
     logging_result_entries, logging_aggregate_data = import_logging_results(model_path)
     counting_result_entries, counting_aggregate_data = import_counting_results(model_path)
 
-    compare_logging_and_counting = pd.concat(
-        [
-            logging_aggregate_data["event_count"].add_prefix(f"logging_"),
-            counting_aggregate_data["event_count"].add_prefix(f"counting_")
-        ], axis=1
-    ).fillna(.0).sort_index()
+    # Create a dictionary containing all preprocessed data.
+    result = {
+        "logging": {
+            "entries": logging_result_entries,
+            "aggregate_data": logging_aggregate_data
+        },
+        "counting": {
+            "entries": counting_result_entries,
+            "aggregate_data": counting_aggregate_data
+        }
+    }
 
-    target_columns = [f"logging_count_{i}" for i, _ in enumerate(logging_result_entries)] + \
-                     [f"counting_count_{i}" for i, _ in enumerate(logging_result_entries)]
-    filtered_data = compare_logging_and_counting[target_columns]
-    filtered_data = filtered_data[filtered_data.index.str.contains(".S")]
-    for target_column in target_columns:
-        filtered_data[f"{target_column}_n"] = filtered_data[target_column] / filtered_data[target_column].sum()
-    correlation_table = create_correlation_table(filtered_data, target_columns)
-    manhattan_table = create_manhattan_table(filtered_data, [f"{v}_n" for v in target_columns])
+    # Validate the source of the models to ensure that they can be compared with each other.
+    validate_source_model(result)
+
+    # Check if the data's integrity shows signs of outside influence or other issues.
+    validate_data_integrity(result)
+
+    # Validate whether the logging and counting data follow a similar trend.
+    validate_logging_representability(result)
+
+    # Return the results as a dictionary.
+    return result
+
+
+def analyze_model(target_model: str):
+    """Analyze the results found for each run of the given model."""
+    # Find the folder that contains the model data and the list of associated result entries.
+    print(f"Analyzing model {target_model}")
+    data = import_model_results(target_model)
+    logging_result_entries = data["logging"]["entries"]
+    logging_aggregate_data = data["logging"]["aggregate_data"]
+    counting_result_entries = data["counting"]["entries"]
+    counting_aggregate_data = data["counting"]["aggregate_data"]
+
     # TODO: check if there are runs that stand out and may possibly be influenced by outside interference.
 
     # TODO: create aggregate data.
 
     # Analyze the data.
-    for data in logging_result_entries:
-        analyze_data(data)
+    # for data in logging_result_entries:
+    #     analyze_data(data)
+    print()
 
 
 if __name__ == '__main__':
     analyze_model("Elevator[CL=3,LBS=4194304,LFS=100MB,T=60s,URP]")
+    analyze_model("Elevator[CL=3,LBS=4194304,LFS=100MB,T=60s]")
 
 # TODO:
 #   - An important observation to make is that the counting and logging methods do not produce the same results.
