@@ -2,6 +2,7 @@ import random
 from typing import Dict
 
 import networkx as nx
+import pandas
 import pandas as pd
 
 from preprocessing.model import preprocess_model_data
@@ -35,6 +36,12 @@ def preprocess_log_data_file_entry(file_data: Dict, array_size: int):
     file_data["count"] = entries
 
 
+def preprocess_table_index(data: pandas.DataFrame, start: int):
+    """Subtract the data frame's index by the given amount such that start plus the index is the original timestamp."""
+    adjusted_indices = data.index.copy() - start
+    data.index = adjusted_indices.copy()
+
+
 def preprocess_log_data_entry(entry_data: Dict):
     """Preprocess a files/global dictionary pair contained within the JSON hierarchy."""
     max_file_duration = max(entry["duration"] for entry in entry_data["files"])
@@ -45,10 +52,20 @@ def preprocess_log_data_entry(entry_data: Dict):
 
 
 def preprocess_log_data(log_data: Dict):
-    """Preprocess the log data entry in the JSON hierarchy."""
+    """Preprocess the log dlog_data["global"]ata entry in the JSON hierarchy."""
     preprocess_log_data_entry(log_data["global"])
-    for entry in log_data["threads"].values():
-        preprocess_log_data_entry(entry)
+    for thread_entry in log_data["threads"].values():
+        preprocess_log_data_entry(thread_entry)
+
+    # Adjust the frequency table start indices.
+    target_tables = [
+        [entry["global"]] + entry["files"] for entry in [log_data["global"]] + list(log_data["threads"].values())
+    ]
+    for table_group in zip(*target_tables):
+        # Use the start of the global entry, since it is assured to be the right value.
+        start = table_group[0]["start"]
+        for table in table_group:
+            preprocess_table_index(table["frequency_table"], start)
 
 
 def create_succession_graph(edges: Dict[str, int]) -> nx.DiGraph:

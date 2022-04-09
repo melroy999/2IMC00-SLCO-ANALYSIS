@@ -1,11 +1,9 @@
-from typing import Dict, List, Tuple, Callable
+from typing import Dict, List, Tuple
 
-import numpy as np
 import pandas
-import pandas as pd
 
-from analyzation import create_correlation_table, create_difference_sum_table, create_aggregate_table, \
-    create_difference_max_table
+from analysis.similarity import get_similarity_measurements
+from analyzation import create_correlation_table, create_difference_sum_table, create_aggregate_table
 
 
 def validate_source_model(data: Dict) -> None:
@@ -23,14 +21,13 @@ def get_similarity_metrics(data: pandas.DataFrame, index_contains: str = None, m
 
     # TODO: what other data could be useful to get to see if outliers are causing the issue?
     #   - Correlation is sensitive to outliers. Could quantiles be used on the difference table to detect these?
+    #   - Chi-squared is proposed, but the data will not always fit the requirements.
 
     correlation_table = create_correlation_table(data, method=method)
     difference_sum_table = create_difference_sum_table(data)
-    difference_max_table = create_difference_max_table(data)
     min_correlation = correlation_table.min().min()
     difference_sum = difference_sum_table.max().max()
-    difference_max = difference_max_table.max().max()
-    return min_correlation, difference_sum, difference_max
+    return min_correlation, difference_sum
 
 
 def get_local_data_integrity_table(global_data: Dict, thread_data: List[Dict]) -> Tuple:
@@ -59,35 +56,85 @@ def validate_local_data_integrity(data: Dict):
     )
 
     # Compare data file-by-file.
-    for i, _ in enumerate(global_log_data["files"]):
-        similarity_data[f"file_{i}"] = get_local_data_integrity_table(
-            global_log_data["files"][i], [thread_log_data[thread_name]["files"][i] for thread_name in thread_names]
-        )
-
-    # Create a table containing all the resulting data.
-    similarity_table = pandas.DataFrame.from_dict(
-        data=similarity_data, orient="index", columns=[
-            "correlation", "difference_sum", "difference_max"
-        ]
-    )
-    print(similarity_table)
+    # TODO: temporarily disabled.
+    # for i, _ in enumerate(global_log_data["files"]):
+    #     similarity_data[f"file_{i}"] = get_local_data_integrity_table(
+    #         global_log_data["files"][i], [thread_log_data[thread_name]["files"][i] for thread_name in thread_names]
+    #     )
+    #
+    # # Create a table containing all the resulting data.
+    # similarity_table = pandas.DataFrame.from_dict(
+    #     data=similarity_data, orient="index", columns=["correlation", "difference_sum"]
+    # )
+    # print(similarity_table)
 
     return similarity_data["*"]
+
+
+
+
+
+def get_message_frequency_similarity_between_runs(data: pandas.DataFrame) -> pandas.DataFrame:
+    """Validate that the message frequency follows a similar trend within each run for the given aggregate table."""
+    # Calculate the correlation coefficient and normalized sum difference tables.
+    similarity_measurements = get_similarity_measurements(data)
+
+    # Create a summary table which indicates whether a threshold has been violated or not.
+    similarity_summary = similarity_measurements["summary"]
+    result = pandas.DataFrame.from_dict(
+        data={
+            "pearson": [
+                similarity_summary["corr"]["pearson"]["min"],
+                "> 0.8",
+                similarity_summary["corr"]["pearson"]["min"] < 0.8
+            ],
+            "spearman": [
+                similarity_summary["corr"]["spearman"]["min"],
+                "> 0.8",
+                similarity_summary["corr"]["spearman"]["min"] < 0.8
+            ],
+            "kendall": [
+                similarity_summary["corr"]["kendall"]["min"],
+                "> 0.8",
+                similarity_summary["corr"]["kendall"]["min"] < 0.8
+            ],
+            "diff_sum": [
+                similarity_summary["diff"]["sum"]["max"],
+                "< 0.2",
+                similarity_summary["diff"]["sum"]["max"] > 0.2
+            ]
+        }, orient="index", columns=["value", "preferred", "violation"]
+    )
+
+    if any(result["violation"]):
+        # TODO: handle a violation more appropriately--a heatmap of the gathered data might be useful.
+        print("One or more of the metrics violate the threshold.")
+        print(result)
+
+    pass
 
 
 def validate_data_integrity(data: Dict) -> None:
     """
     Find signs that may indicate that the data may be affected by an outside influence and hence less representable.
     """
+    logging_agg_frequency = data["logging"]["aggregate_data"]["event_count"].add_prefix(f"logging_")
+    counting_agg_frequency = data["counting"]["aggregate_data"]["event_count"].add_prefix(f"counting_")
+    full_agg_frequency = create_aggregate_table([logging_agg_frequency, counting_agg_frequency], add_index_suffix=False)
+    s_agg_frequency = full_agg_frequency[full_agg_frequency.index.str.contains(".S")]
+
+    # validate_message_frequency_similarity_between_runs(logging_agg_frequency)
+    # validate_message_frequency_similarity_between_runs(counting_agg_frequency)
+    get_message_frequency_similarity_between_runs(full_agg_frequency)
+    get_message_frequency_similarity_between_runs(s_agg_frequency)
+
     # Get a list of all logging based entries.
     logging_results = data["logging"]["entries"]
 
     # Validate targets in individual results and combine them into a data frame.
     similarity_data = {f"run_{i}": validate_local_data_integrity(result) for i, result in enumerate(logging_results)}
     similarity_table = pandas.DataFrame.from_dict(
-        data=similarity_data, orient="index", columns=[
-            "correlation", "difference_sum", "difference_max"
-        ]
+        data=similarity_data, orient="index", columns=["correlation", "difference_sum"]
     )
 
     print(f"\nSimilarity metric extremes for logging-based measurements.")
@@ -135,7 +182,7 @@ def validate_logging_representability(data: Dict) -> None:
 
     # Return the results as a data table.
     result = pandas.DataFrame.from_dict(
-        data=results, orient="index", columns=["correlation", "difference_sum", "difference_max"]
+        data=results, orient="index", columns=["correlation", "difference_sum"]
     )
     # TODO: test per interval.
 

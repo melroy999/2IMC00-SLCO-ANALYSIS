@@ -4,8 +4,9 @@ from typing import Dict, Tuple, List
 
 import pandas as pd
 
-from analyzation import analyze_data, create_logging_aggregate_data, create_counting_aggregate_data, \
-    create_correlation_table, create_difference_sum_table, create_aggregate_table
+from analysis.similarity import perform_model_similarity_analysis
+from preprocessing.aggregate import combine_aggregate_data, create_logging_aggregate_data, \
+    create_counting_aggregate_data
 from preprocessing.counting import preprocess_counting_data
 from preprocessing.logging import preprocess_logging_data
 from validation import validate_source_model, validate_data_integrity, validate_logging_representability
@@ -69,9 +70,17 @@ def import_model_results(target_model: str) -> Dict:
     model_path = path.join("results", target_model)
     logging_result_entries, logging_aggregate_data = import_logging_results(model_path)
     counting_result_entries, counting_aggregate_data = import_counting_results(model_path)
+    aggregate_data = combine_aggregate_data(logging_aggregate_data, counting_aggregate_data)
+
+    # Get the model information of one of the models.
+    model_data = (logging_result_entries + logging_result_entries)[0]["model"]
 
     # Create a dictionary containing all preprocessed data.
     result = {
+        "model": {
+            "id": target_model,
+            "data": model_data
+        },
         "logging": {
             "entries": logging_result_entries,
             "aggregate_data": logging_aggregate_data
@@ -79,17 +88,22 @@ def import_model_results(target_model: str) -> Dict:
         "counting": {
             "entries": counting_result_entries,
             "aggregate_data": counting_aggregate_data
-        }
+        },
+        "aggregate": aggregate_data
     }
 
     # Validate the source of the models to ensure that they can be compared with each other.
     validate_source_model(result)
 
-    # Check if the data's integrity shows signs of outside influence or other issues.
-    validate_data_integrity(result)
+    # Remove model information from the entries.
+    for entry in logging_result_entries + counting_result_entries:
+        del entry["model"]
 
-    # Validate whether the logging and counting data follow a similar trend.
-    validate_logging_representability(result)
+    # # Check if the data's integrity shows signs of outside influence or other issues.
+    # validate_data_integrity(result)
+    #
+    # # Validate whether the logging and counting data follow a similar trend.
+    # validate_logging_representability(result)
 
     # Return the results as a dictionary.
     return result
@@ -100,18 +114,8 @@ def analyze_model(target_model: str):
     # Find the folder that contains the model data and the list of associated result entries.
     print(f"Analyzing model {target_model}")
     data = import_model_results(target_model)
-    logging_result_entries = data["logging"]["entries"]
-    logging_aggregate_data = data["logging"]["aggregate_data"]
-    counting_result_entries = data["counting"]["entries"]
-    counting_aggregate_data = data["counting"]["aggregate_data"]
+    perform_model_similarity_analysis(data)
 
-    # TODO: check if there are runs that stand out and may possibly be influenced by outside interference.
-
-    # TODO: create aggregate data.
-
-    # Analyze the data.
-    # for data in logging_result_entries:
-    #     analyze_data(data)
     print()
 
 
