@@ -3,8 +3,11 @@ from typing import Dict
 import numpy as np
 import pandas
 import pandas as pd
+from matplotlib import pyplot as plt
 
 from analysis.util import create_correlation_table, create_difference_sum_table
+from visualization.model import get_similarity_report, get_throughput_report
+from visualization.table import render_heatmap, render_correlation_heatmap, render_frequency_heatmap
 
 
 def get_similarity_measurements_summary_statistics(data: pd.DataFrame) -> Dict[str, float]:
@@ -133,7 +136,18 @@ def perform_model_similarity_analysis(model_results: Dict):
         }
     }
     similarity_measurements = recursively_generate_similarity_measurements(model_results, similarity_data_targets)
-    print()
+
+    # render_correlation_heatmap(
+    #     similarity_measurements["aggregate"]["message_frequency"]["corr"]["pearson"]
+    # )
+    #
+    # for v in model_results["logging"]["aggregate_data"]["log_data"]["runs"]:
+    #     render_frequency_heatmap(
+    #         v["aggregate_data"]["file_log_frequencies"]
+    #     )
+
+    get_throughput_report(model_results)
+    get_similarity_report(model_results, similarity_measurements)
 
     # TODO: decide what to do with rows with only zeroes.
     # TODO: report elaborate similarity analysis on global message frequency (counting vs logging).

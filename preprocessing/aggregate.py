@@ -178,6 +178,18 @@ def create_logging_log_aggregate_data(logging_results: List[Dict]) -> Dict:
             }
             run_aggregate_data["files"]["entries"].append(file_result)
 
+        # TODO: Create aggregate tables for the files. These can be used in plots.
+        run_aggregate_data["aggregate_data"] = {
+            "file_log_frequencies": create_aggregate_table(
+                logging_result["log_data"]["global"]["files"], select_file_log_frequency
+            ),
+            "threads": {
+                k: create_aggregate_table(
+                    v["files"], select_file_log_frequency
+                ) for k, v in logging_result["log_data"]["threads"].items()
+            }
+        }
+
         # Add the run data.
         aggregate_data["runs"].append(run_aggregate_data)
 
