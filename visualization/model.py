@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 
 from analysis.util import create_aggregate_table
-from visualization.table import render_correlation_heatmap, render_frequency_heatmap, render_model_data_table
+from visualization.table import render_heatmap, render_frequency_heatmap, render_model_data_table
 
 
 def get_throughput_report(model_results: Dict):
@@ -29,7 +29,7 @@ def get_throughput_report(model_results: Dict):
             outer_nested_mosaic = [
                 ["Global"],
                 ["Thread"],
-                ["Table"]
+                ["Table"],
             ]
             fig, axd = plt.subplot_mosaic(
                 outer_nested_mosaic, empty_sentinel="."
@@ -76,11 +76,10 @@ def get_throughput_report(model_results: Dict):
 
             # Calculate the differences model-wide such that they can be included in the data table.
             sum_difference_table = run["log_frequency"].subtract(run["log_frequency"].min(axis=1), axis=0)
-            n = len(run["log_frequency"].index)
             thread_to_sum_difference_rate = {
                 k: sum_difference_table[
                     f"{k.lower().replace('-', '_')}_frequency"
-                ].sum() / n for k, v in model_results["logging"]["entries"][run_id]["log_data"]["threads"].items()
+                ].mean() for k, v in model_results["logging"]["entries"][run_id]["log_data"]["threads"].items()
             }
             thread_to_max_difference_rate = {
                 k: sum_difference_table[
@@ -107,7 +106,7 @@ def get_throughput_report(model_results: Dict):
             # Render a title that adds identification information.
             model_information_table = pd.DataFrame.from_dict(
                 model_information_data, orient="index", columns=[
-                    "", "#Messages", "Rate (#/ms)", "Activity", "Diff Rate (#/ms)", "Max Diff"
+                    "", "#Messages", "Rate (#/ms)", "Activity", "Mean Diff (#/ms)", "Max Diff (#/ms)"
                 ]
             )
             render_model_data_table(
@@ -118,33 +117,76 @@ def get_throughput_report(model_results: Dict):
 
             plt.tight_layout()
             plt.show()
-            plt.close("all")
 
 
 def get_similarity_report(model_results: Dict, similarity_measurements: Dict):
-    return
-
-    # TODO: Create the layout to be used for the report.
-    # Set the figure size this way such that the color bar is always made the right size.
-    plt.rcParams["figure.figsize"] = (6.4, 16)
-    plt.rcParams["figure.dpi"] = 300
-
-    fig, (pearson_corr_ax, spearman_corr_ax, kendall_corr_ax, sum_diff_ax) = plt.subplots(4, 1)
-
-    # Find the target tables.
+    # Gather the data (Spearman + Normalized Sum Difference) that needs to be plotted.
     aggregate_message_frequency = similarity_measurements["aggregate"]["message_frequency"]
-    aggregate_message_frequency_pearson_corr = aggregate_message_frequency["corr"]["pearson"]
     aggregate_message_frequency_spearman_corr = aggregate_message_frequency["corr"]["spearman"]
-    aggregate_message_frequency_kendall_corr = aggregate_message_frequency["corr"]["kendall"]
     aggregate_message_frequency_sum_diff = aggregate_message_frequency["diff"]["sum"]
 
-    # Report the similarity between counting-based data and logging-based data measurements.
-    render_correlation_heatmap(aggregate_message_frequency_pearson_corr, pearson_corr_ax)
-    render_correlation_heatmap(aggregate_message_frequency_spearman_corr, spearman_corr_ax)
-    render_correlation_heatmap(aggregate_message_frequency_kendall_corr, kendall_corr_ax)
-    render_correlation_heatmap(aggregate_message_frequency_kendall_corr, sum_diff_ax)
+    agg_succession_freq = similarity_measurements["logging"]["aggregate_data"]["message_data"]["succession_frequency"]
+    aggregate_succession_frequency_spearman_corr = agg_succession_freq["corr"]["spearman"]
+    aggregate_succession_frequency_sum_diff = agg_succession_freq["diff"]["sum"]
+    # aggregate_transition_succession_frequency = aggregate_message_data["transition_succession_frequency"]
 
-    plt.tight_layout()
-    plt.show()
+    plot_data = [
+        {
+            "data": aggregate_message_frequency_spearman_corr,
+            "title": "Similarity Between Logging and Counting-Based Frequencies\n (Spearman Correlation Coefficient)",
+            "vmin": -1.0,
+            "vmax": 1.0,
+            "center": 0.0,
+            "cmap": None,
+            "size": (6.4, 6.4)
+        },
+        {
+            "data": aggregate_message_frequency_sum_diff,
+            "title": "Similarity Between Logging and Counting-Based Frequencies\n (Absolute Sum Difference)",
+            "vmin": 0.0,
+            "vmax": 2.0,
+            "center": None,
+            "cmap": sns.color_palette("rocket_r", as_cmap=True),
+            "size": (6.4, 6.4)
+        },
+        {
+            "data": aggregate_succession_frequency_spearman_corr,
+            "title": "Similarity Between Succession Frequencies\n (Spearman Correlation Coefficient)",
+            "vmin": -1.0,
+            "vmax": 1.0,
+            "center": 0.0,
+            "cmap": None,
+            "size": (4, 4)
+        },
+        {
+            "data": aggregate_succession_frequency_sum_diff,
+            "title": "Similarity Between Succession Frequencies\n (Absolute Sum Difference)",
+            "vmin": 0.0,
+            "vmax": 2.0,
+            "center": None,
+            "cmap": sns.color_palette("rocket_r", as_cmap=True),
+            "size": (4, 4)
+        },
+    ]
+    for target_data in plot_data:
+        # Set render settings.
+        plt.rcParams["figure.figsize"] = target_data["size"]
+        plt.rcParams["figure.dpi"] = 300
 
-    pass
+        # Display borders and ticks.
+        with sns.axes_style("ticks"):
+            # Render the data as a heatmap.
+            render_heatmap(
+                target_data["data"],
+                None,
+                title=target_data["title"],
+                v_min=target_data["vmin"],
+                v_max=target_data["vmax"],
+                center=target_data["center"],
+                cmap=target_data["cmap"]
+            )
+
+            plt.tight_layout()
+            plt.show()
+
+    return
