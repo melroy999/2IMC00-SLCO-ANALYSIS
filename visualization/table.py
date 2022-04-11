@@ -10,7 +10,8 @@ def render_frequency_heatmap(
         ax,
         title="",
         xlabel="Time (ms)",
-        ylabel="File number"
+        ylabel="File number",
+        cmap=sns.color_palette("rocket_r", as_cmap=True)
 ):
     """Render a heatmap for the given frequency table."""
     # Use the seaborn theme.
@@ -22,17 +23,24 @@ def render_frequency_heatmap(
     # Display borders and ticks.
     with sns.axes_style("ticks"):
         # Plot the data frame as a color mesh plot.
-        c = ax.pcolormesh(modified_df)
+        c = ax.pcolormesh(modified_df, cmap=cmap)
         ax.set_title(title)
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
         ax.invert_yaxis()
         plt.colorbar(c, ax=ax, pad=0.015)
 
-        # Tighten the layout and show the plot.
-        # plt.tight_layout()
-        # plt.savefig("example_1.pdf", format="pdf", bbox_inches="tight") # ISSUE: Creates big files.
-        # plt.show()
+
+def render_model_data_table(data: pandas.DataFrame, ax):
+    """Render the given data frame as a table."""
+    ax.set_axis_off()
+    ax.table(cellText=data.values, colLabels=data.columns, loc="center", edges="open", cellLoc="left", colLoc="left")
+
+
+def render_text(text: str, ax):
+    """Render the given string as text replacing an axis."""
+    ax.set_axis_off()
+    ax.text(0.5, 0.5, text, ha="center", va="center")
 
 
 def render_correlation_heatmap(data: pandas.DataFrame, ax):
