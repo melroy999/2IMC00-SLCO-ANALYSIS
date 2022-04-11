@@ -14,9 +14,6 @@ def render_frequency_heatmap(
         cmap=sns.color_palette("rocket_r", as_cmap=True)
 ):
     """Render a heatmap for the given frequency table."""
-    # Use the seaborn theme.
-    sns.set_theme()
-
     # Preprocess the data to be included in the plot.
     modified_df = data.rename(columns=lambda name: int(name.split('_')[-1])).transpose()
 
@@ -28,19 +25,19 @@ def render_frequency_heatmap(
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
         ax.invert_yaxis()
-        plt.colorbar(c, ax=ax, pad=0.015)
+        color_bar = plt.colorbar(c, ax=ax, pad=0.015)
+        color_bar.ax.set_ylabel("Frequency", rotation=270, labelpad=18)
 
 
-def render_model_data_table(data: pandas.DataFrame, ax):
+def render_model_data_table(data: pandas.DataFrame, ax, title=""):
     """Render the given data frame as a table."""
-    ax.set_axis_off()
-    ax.table(cellText=data.values, colLabels=data.columns, loc="center", edges="open", cellLoc="left", colLoc="left")
-
-
-def render_text(text: str, ax):
-    """Render the given string as text replacing an axis."""
-    ax.set_axis_off()
-    ax.text(0.5, 0.5, text, ha="center", va="center")
+    ax.table(
+        cellText=data.values, colLabels=data.columns, loc="upper center", edges="open", cellLoc="left", colLoc="left",
+        bbox=[0.0, 0.45, 1, 0.5],
+        colWidths=[2.5 / len(data.columns)] * len(data.columns)
+    )
+    ax.axis("off")
+    ax.set_title(title)
 
 
 def render_correlation_heatmap(data: pandas.DataFrame, ax):

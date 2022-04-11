@@ -1,20 +1,21 @@
 from typing import Dict
 
-import matplotlib
 import pandas as pd
 from matplotlib import pyplot as plt
 import seaborn as sns
 
 from analysis.util import create_aggregate_table
-from visualization.table import render_correlation_heatmap, render_frequency_heatmap, render_model_data_table, \
-    render_text
+from visualization.table import render_correlation_heatmap, render_frequency_heatmap, render_model_data_table
 
 
 def get_throughput_report(model_results: Dict):
     """Report on the logging throughput of each run."""
     # Set render settings.
-    plt.rcParams["figure.figsize"] = (8, 7)
+    plt.rcParams["figure.figsize"] = (8, 9)
     plt.rcParams["figure.dpi"] = 300
+
+    # Use the seaborn theme.
+    sns.set_theme()
 
     # Get information about the model.
     model_name = model_results["model"]["data"]["name"]
@@ -28,19 +29,10 @@ def get_throughput_report(model_results: Dict):
             outer_nested_mosaic = [
                 ["Global"],
                 ["Thread"],
-                [
-                    [
-                        [
-                            [
-                                ["Bottom A"] * 9 + ["Bottom B"] * 17
-                            ]
-                        ],
-                        ["Bottom C"]
-                    ]
-                ],
+                ["Table"]
             ]
             fig, axd = plt.subplot_mosaic(
-                outer_nested_mosaic, empty_sentinel=None
+                outer_nested_mosaic, empty_sentinel="."
             )
 
             # Render the global file log frequencies.
@@ -64,10 +56,10 @@ def get_throughput_report(model_results: Dict):
                 target_columns = [f"{column_name}_{i}" for i in run_range]
 
                 # Get the row-wise mean values for the current column.
-                row_mean_values = threads_log_frequencies[target_columns].mean(axis=1)
+                row_mean_values = threads_log_frequencies[target_columns].min(axis=1)
 
                 # Calculate the differences.
-                frequency_differences = threads_log_frequencies[target_columns].subtract(row_mean_values, axis=0).abs()
+                frequency_differences = threads_log_frequencies[target_columns].subtract(row_mean_values, axis=0)
 
                 # Add the difference sum value to the table.
                 threads_log_frequencies[f"diff_sum_{column_name}"] = frequency_differences.sum(axis=1)
@@ -79,45 +71,54 @@ def get_throughput_report(model_results: Dict):
             render_frequency_heatmap(
                 thread_frequency_diff_sums,
                 axd["Thread"],
-                title=f"\"{model_name}\" Logging Throughput Frequency (Thread Differences)"
+                title=f"\"{model_name}\" Logging Throughput Frequency (Difference Sum to Row Min)"
             )
-            # Add a table with information about the model.
-            model_information_table = pd.DataFrame.from_dict({
-                "": [
-                    "#Files",
-                    "#Threads",
-                    "#Messages",
-                    "Duration (ms)"
-                ],
-                " ": [str(v) for v in [
-                    len(run["files"]),
-                    len(run["aggregate_data"]["threads"]),
-                    int(run["log_frequency"].sum().sum()),
-                    f"{len(run['log_frequency'].index)}"
-                ]]
-            })
-            render_model_data_table(model_information_table, axd["Bottom A"])
 
-            # TODO: Add a table showing average rates for each thread and percentage of activity.
+            # Calculate the differences model-wide such that they can be included in the data table.
+            sum_difference_table = run["log_frequency"].subtract(run["log_frequency"].min(axis=1), axis=0)
+            n = len(run["log_frequency"].index)
+            thread_to_sum_difference_rate = {
+                k: sum_difference_table[
+                    f"{k.lower().replace('-', '_')}_frequency"
+                ].sum() / n for k, v in model_results["logging"]["entries"][run_id]["log_data"]["threads"].items()
+            }
+            thread_to_max_difference_rate = {
+                k: sum_difference_table[
+                    f"{k.lower().replace('-', '_')}_frequency"
+                ].max() for k, v in model_results["logging"]["entries"][run_id]["log_data"]["threads"].items()
+            }
+
+            # Add a table showing average rates for each thread and percentage of activity.
             model_information_data = {
                 k: [
-                    k, v["global"]["lines"], f"{v['global']['rate']:.0f}", f"{v['global']['activity']:.2%}"
+                    k,
+                    v["global"]["lines"],
+                    f"{v['global']['rate']:.2f}",
+                    f"{v['global']['activity']:.2%}",
+                    f"{sum(thread_to_sum_difference_rate.values()):.2f}" if k == "Global"
+                    else f"{thread_to_sum_difference_rate[k]:.2f}",
+                    f"{max(thread_to_max_difference_rate.values()):.0f}" if k == "Global"
+                    else f"{thread_to_max_difference_rate[k]:.0f}"
                 ] for k, v in list(model_results["logging"]["entries"][run_id]["log_data"]["threads"].items()) + [
-                    ("Total", model_results["logging"]["entries"][run_id]["log_data"]["global"])
+                    ("Global", model_results["logging"]["entries"][run_id]["log_data"]["global"])
                 ]
             }
 
+            # Render a title that adds identification information.
             model_information_table = pd.DataFrame.from_dict(
-                model_information_data, orient="index", columns=["", "#Messages", "Rate (#/ms)", "Activity"]
+                model_information_data, orient="index", columns=[
+                    "", "#Messages", "Rate (#/ms)", "Activity", "Diff Rate (#/ms)", "Max Diff"
+                ]
             )
-            render_model_data_table(model_information_table, axd["Bottom B"])
-
-            # Render a text that adds identification information.
-            render_text(f"{model_id} (Run #{run_id})", axd["Bottom C"])
+            render_model_data_table(
+                model_information_table,
+                axd["Table"],
+                title=f"{model_id} (Run = {run_id}, #Files = {len(run['files']['entries'])})"
+            )
 
             plt.tight_layout()
             plt.show()
-
+            plt.close("all")
 
 
 def get_similarity_report(model_results: Dict, similarity_measurements: Dict):
@@ -146,7 +147,4 @@ def get_similarity_report(model_results: Dict, similarity_measurements: Dict):
     plt.tight_layout()
     plt.show()
 
-
     pass
-
-
