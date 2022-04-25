@@ -1,11 +1,10 @@
-import random
 from typing import Dict
 
 import networkx as nx
 import pandas
 import pandas as pd
 
-from preprocessing.model import preprocess_model_data
+from preprocessing.old.model import preprocess_model_data
 
 
 def preprocess_log_data_file_entry(file_data: Dict, array_size: int):

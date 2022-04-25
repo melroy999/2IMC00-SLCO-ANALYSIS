@@ -2,7 +2,7 @@ from typing import Dict
 
 import pandas as pd
 
-from preprocessing.model import preprocess_model_data
+from preprocessing.old.model import preprocess_model_data
 
 
 def preprocess_counting_data(data: Dict):
