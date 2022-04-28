@@ -54,20 +54,24 @@ def create_aggregate_log_frequency_table(target_data_frames: List[pd.DataFrame],
 def preprocess_model_log_frequency_data(model_results: Dict, model_information: Dict) -> Dict:
     """Preprocess all the log frequency related data and convert the found results into aggregate data."""
     # Convert all log frequency global data to data frames.
-    log_frequency_target_columns = defaultdict(list)
+    log_frequency_target_columns = {
+        "run": defaultdict(list), "thread": defaultdict(list)
+    }
     log_frequency_data_frames = []
     for i, run_data in enumerate(model_results["logging"]):
         start_timestamp = run_data["log_data"]["global"]["global"]["start"]
+        end_timestamp = run_data["log_data"]["global"]["global"]["end"]
         for thread_name, thread_data in run_data["log_data"]["threads"].items():
             state_machine_name, _ = model_information["thread_to_state_machine"][thread_name]
             column_name = f"frequency_{state_machine_name}_{i}"
             frequency_data = thread_data["global"]["count"]
-            frequency_data = preprocess_log_frequency_table(frequency_data, start_timestamp)
+            frequency_data = preprocess_log_frequency_table(frequency_data, start_timestamp, end_timestamp)
             log_frequency_data_frames.append(
                 pd.DataFrame.from_dict(frequency_data, orient="index", columns=[column_name])
             )
             log_frequency_data_frames[-1].index.name = "timestamp"
-            log_frequency_target_columns[state_machine_name].append(column_name)
+            log_frequency_target_columns["run"][i].append(column_name)
+            log_frequency_target_columns["thread"][state_machine_name].append(column_name)
 
     # Convert all log frequency data grouped per file to data frames.
     file_log_frequency_target_columns = {
@@ -279,7 +283,6 @@ def preprocess_model_message_succession_data(
         model_results: Dict, model_information: Dict, graph_type: str = "transition_succession_graph"
 ) -> Dict:
     """Preprocess all the message succession data and convert the found results into aggregate data."""
-    # TODO: Create graphs.
     message_order_target_columns = []
     message_order_data_frames = []
     for i, run_data in enumerate(model_results["logging"]):

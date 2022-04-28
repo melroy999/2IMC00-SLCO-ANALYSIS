@@ -1,34 +1,16 @@
-from typing import List, Callable, Dict
+from typing import List, Callable
 
 import numpy as np
 import pandas as pd
+from scipy.stats import ks_2samp
 
 
-def create_desc_statistics_table(data: pd.DataFrame):
-    """Create a table that contains the descriptive statistics of the given data."""
-    descriptive_data = pd.DataFrame(index=data.index, columns=["min", "mean", "median", "max", "std"])
-    descriptive_data[f"min"] = data.min(axis=1)
-    descriptive_data[f"mean"] = data.mean(axis=1)
-    descriptive_data[f"median"] = data.median(axis=1)
-    descriptive_data[f"max"] = data.max(axis=1)
-    descriptive_data[f"std"] = data.std(axis=1)
-    return descriptive_data
-
-
-def create_aggregate_table(
-        results: List[Dict], target: Callable = lambda v: v, add_index_suffix: bool = True
-) -> pd.DataFrame:
-    """Create a data frame that holds aggregate data for the target in question."""
-    # Add a suffix if requested.
-    if add_index_suffix:
-        results = [target(v).add_suffix(f"_{i}") for i, v in enumerate(results)]
-
-    # Use the selector to target the tables that need to be merged. Replace missing values with zeros.
-    return pd.concat(results, axis=1).fillna(.0).sort_index()
-
-
-def create_normalized_table(data: pd.DataFrame, target_columns: List[str]) -> pd.DataFrame:
+def create_normalized_table(data: pd.DataFrame, target_columns: List[str] = None) -> pd.DataFrame:
     """Normalize the given data frame by scaling each column such that its sum is one."""
+    if target_columns is None:
+        # Set the target columns to be all of the columns.
+        target_columns = list(data)
+
     normalized_data = pd.DataFrame(index=data.index, columns=target_columns)
     for target_column in target_columns:
         normalized_data[target_column] = data[target_column] / data[target_column].sum()
@@ -42,11 +24,6 @@ def create_correlation_table(
     if target_columns is None:
         target_columns = list(data)
     return data[target_columns].corr(method=method)
-
-
-def get_difference_sum(a, b) -> float:
-    """Get the difference between the two arrays."""
-    return sum(abs(val1 - val2) for val1, val2 in zip(a, b))
 
 
 def create_measurement_table(
@@ -64,6 +41,11 @@ def create_measurement_table(
     return pd.DataFrame(index=target_columns, columns=target_columns, data=np.array(
         [[measure(data[i], data[j]) for j in target_columns] for i in target_columns]
     ))
+
+
+def get_difference_sum(a, b) -> float:
+    """Get the difference between the two arrays."""
+    return sum(abs(val1 - val2) for val1, val2 in zip(a, b))
 
 
 def create_difference_sum_table(data: pd.DataFrame, target_columns: List[str] = None) -> pd.DataFrame:
@@ -95,3 +77,14 @@ def create_difference_sum_table(data: pd.DataFrame, target_columns: List[str] = 
     """
     # Call the measurement table function with the difference function.
     return create_measurement_table(data, get_difference_sum, target_columns, True)
+
+
+def get_kolmogorov_smirnov_test_p_value(a, b) -> float:
+    """Get the difference between the two arrays."""
+    statistic, p_value = ks_2samp(a.values, b.values)
+    return p_value
+
+
+def create_kolmogorov_smirnov_test_table(data: pd.DataFrame, target_columns: List[str] = None):
+    """Calculate the p-value for all column pairs in the given data frame over the target columns."""
+    return create_measurement_table(data, get_kolmogorov_smirnov_test_p_value, target_columns, False)

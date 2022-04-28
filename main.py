@@ -2,6 +2,7 @@ import json
 from os import path, listdir
 from typing import Dict, List
 
+from analysis.model import analyze_model_results
 from preprocessing.model import preprocess_model_results
 
 
@@ -41,9 +42,7 @@ def import_model_results(target_model: str) -> Dict:
     }
 
     # Preprocess the results.
-    data = preprocess_model_results(model_results, target_model)
-
-    return data
+    return preprocess_model_results(model_results, target_model)
 
 
 def analyze_model(target_model: str):
@@ -51,12 +50,9 @@ def analyze_model(target_model: str):
     # Find the folder that contains the model data and the list of associated result entries.
     print(f"Analyzing model {target_model}")
     data = import_model_results(target_model)
+    analyze_model_results(data)
 
 
 if __name__ == '__main__':
-    analyze_model("Elevator[CL=3,LBS=4194304,LFS=100MB,T=60s,URP]")
-    analyze_model("Elevator[CL=3,LBS=4194304,LFS=100MB,T=60s]")
-
-# TODO:
-#   - An important observation to make is that the counting and logging methods do not produce the same results.
-#       - However, when filtering on successful events only, the results are once again quite similar.
+    analyze_model("Elevator[T=60s,URP]")
+    analyze_model("Elevator[T=60s]")
