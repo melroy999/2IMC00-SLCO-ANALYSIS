@@ -14,7 +14,8 @@ def plot_heatmap(
         y_label: str = "Y Label",
         c_bar_label: str = "Color Bar Label",
         rotate_top_labels: bool = True,
-        input_heatmap_options=None
+        input_heatmap_options=None,
+        invert_y_axis: bool = False,
 ):
     """Plot a heatmap with the given data."""
     # Set default figure options and add any overridden options.
@@ -43,6 +44,10 @@ def plot_heatmap(
     if rotate_top_labels:
         plt.setp(heatmap_ax.get_xticklabels(), rotation=-45, ha="right", rotation_mode="anchor")
     plt.setp(heatmap_ax.get_yticklabels(), rotation=0, ha="right", rotation_mode="anchor")
+
+    if invert_y_axis:
+        # Invert the y-axis such that the first element appears on top.
+        heatmap_ax.invert_yaxis()
 
     # Decorate the figure with the appropriate titles and axis labels.
     parent_fig.suptitle(title, y=1.00)
@@ -83,7 +88,10 @@ def plot_corr_heatmap(
         heatmap_options |= input_heatmap_options
 
     # Call the heatmap plot method.
-    plot_heatmap(data, parent_fig, title, x_label, y_label, c_bar_label, input_heatmap_options=heatmap_options)
+    plot_heatmap(
+        data, parent_fig, title, x_label, y_label, c_bar_label,
+        input_heatmap_options=heatmap_options, invert_y_axis=True
+    )
 
 
 def plot_pcolormesh(
@@ -133,3 +141,4 @@ def plot_pcolormesh(
     pcolormesh_ax.spines["bottom"].set_visible(False)
     pcolormesh_ax.spines["left"].set_visible(False)
     color_bar.outline.set_visible(False)
+

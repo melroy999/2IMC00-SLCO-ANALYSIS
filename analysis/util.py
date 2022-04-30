@@ -2,7 +2,7 @@ from typing import List, Callable
 
 import numpy as np
 import pandas as pd
-from scipy.stats import ks_2samp
+from scipy.stats import ks_2samp, ttest_ind, ttest_rel
 
 
 def create_normalized_table(data: pd.DataFrame, target_columns: List[str] = None) -> pd.DataFrame:
@@ -80,7 +80,7 @@ def create_difference_sum_table(data: pd.DataFrame, target_columns: List[str] = 
 
 
 def get_kolmogorov_smirnov_test_p_value(a, b) -> float:
-    """Get the difference between the two arrays."""
+    """Get the kolmogorov smirnov test p-value between the two arrays."""
     statistic, p_value = ks_2samp(a.values, b.values)
     return p_value
 
@@ -88,3 +88,14 @@ def get_kolmogorov_smirnov_test_p_value(a, b) -> float:
 def create_kolmogorov_smirnov_test_table(data: pd.DataFrame, target_columns: List[str] = None):
     """Calculate the p-value for all column pairs in the given data frame over the target columns."""
     return create_measurement_table(data, get_kolmogorov_smirnov_test_p_value, target_columns, False)
+
+
+def get_t_test_p_value(a, b) -> float:
+    """Get the student t-test p-value between the two arrays."""
+    statistic, p_value = ttest_rel(a, b)
+    return p_value
+
+
+def create_student_t_test_table(data: pd.DataFrame, target_columns: List[str] = None):
+    """Calculate the p-value for all column pairs in the given data frame over the target columns."""
+    return create_measurement_table(data, get_t_test_p_value, target_columns, False)

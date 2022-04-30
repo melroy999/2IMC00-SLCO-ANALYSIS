@@ -207,7 +207,7 @@ def preprocess_model_message_frequency_data(model_results: Dict, model_informati
 
         # Convert all interval data to data frames.
         for interval_data in run_data["message_data"]["intervals"]:
-            column_name = f"{logging_target_columns[i]}_i_{interval_data['start']}_{interval_data['end']}"
+            column_name = f"frequency_{i}_i_{interval_data['start']}_{interval_data['end']}"
             frequency_data = interval_data["data"]["event_count"]
             frequency_data = preprocess_message_frequency_table(frequency_data, model_information)
             logging_interval_data_frames.append(
@@ -227,7 +227,7 @@ def preprocess_model_message_frequency_data(model_results: Dict, model_informati
     # Merge all interval data frames.
     aggregate_interval_frequency_data = {
         "settings": logging_interval_settings,
-        "targets": dict(logging_interval_target_columns),
+        "targets": logging_interval_target_columns,
         "table": create_aggregate_message_frequency_table(logging_interval_data_frames)
     }
 
@@ -293,7 +293,7 @@ def preprocess_model_message_succession_data(
         message_order_target_columns.append(column_name)
 
     # Convert all logging-based interval message order data to data frames and graphs.
-    message_order_interval_target_columns = defaultdict(list)
+    message_order_interval_target_columns = {"intervals": defaultdict(list), "runs": defaultdict(list)}
     message_order_interval_data_frames = []
     logging_interval_settings = None
     for i, run_data in enumerate(model_results["logging"]):
@@ -313,7 +313,9 @@ def preprocess_model_message_succession_data(
             message_order_data = interval_data["data"][graph_type]
             message_order_data = preprocess_message_order_table(message_order_data, model_information, column_name)
             message_order_interval_data_frames.append(pd.DataFrame.from_dict(message_order_data))
-            message_order_interval_target_columns[(interval_data["start"], interval_data["end"])].append(column_name)
+            start, end = (interval_data["start"], interval_data["end"])
+            message_order_interval_target_columns["intervals"][start, end].append(column_name)
+            message_order_interval_target_columns["runs"][i].append(column_name)
 
     # Merge all the global data frames.
     aggregate_message_order_data, message_order_adjacency_table = merge_message_order_data_frames(
@@ -327,7 +329,7 @@ def preprocess_model_message_succession_data(
     }
 
     # Merge all the interval data frames.
-    target_columns = [x for v in message_order_interval_target_columns.values() for x in v]
+    target_columns = [x for v in message_order_interval_target_columns["intervals"].values() for x in v]
     aggregate_interval_message_order_data, message_interval_order_adjacency_table = merge_message_order_data_frames(
         message_order_interval_data_frames, target_columns
     )
@@ -335,7 +337,7 @@ def preprocess_model_message_succession_data(
     # Create a data structure for the interval results.
     aggregate_interval_frequency_data = {
         "settings": logging_interval_settings,
-        "targets": dict(message_order_interval_target_columns),
+        "targets": message_order_interval_target_columns,
         "adjacency_table": message_interval_order_adjacency_table,
         "frequency_table": aggregate_interval_message_order_data
     }
