@@ -6,7 +6,6 @@ from matplotlib.ticker import FuncFormatter
 
 from visualization.boxplot import plot_comparison_boxplot
 from visualization.heatmap import plot_heatmap
-import seaborn as sns
 
 
 def remove_subject_label_suffix(x):
@@ -27,7 +26,10 @@ def get_revised_index_names(data: pd.DataFrame, abbreviation: Dict) -> Dict:
     return renaming_dict
 
 
-def plot_transition_frequency_boxplot(frequency_data: pd.DataFrame, model_data: Dict):
+# previous_results = dict()
+
+
+def plot_transition_frequency_boxplot(frequency_data: pd.DataFrame, model_data: Dict, _type: str = "Logging"):
     """Plot the transition frequencies recorded in the model."""
     # Plot the number of successful transitions and the percentage of successful transitions side by side in a boxplot.
     opening_frequency_data = frequency_data[frequency_data.index.str.endswith("O")]
@@ -49,6 +51,7 @@ def plot_transition_frequency_boxplot(frequency_data: pd.DataFrame, model_data: 
     # Transpose and flatten the two tables such that they can be plotted as box plots.
     success_frequency_data = success_frequency_data.transpose().melt()
     success_ratio_data = success_ratio_data.transpose().melt()
+    # previous_results[model_data['model']['id']] = (success_frequency_data, success_ratio_data)
 
     # Create two sub-figures.
     root_fig = plt.figure(figsize=(8, 6), dpi=300)
@@ -60,10 +63,34 @@ def plot_transition_frequency_boxplot(frequency_data: pd.DataFrame, model_data: 
         x_label_left="Count",
         x_label_right="Percentage"
     )
-    root_fig.suptitle(f"Successful Transition/DC Executions ({model_data['model']['id']})", y=1.00)
+    root_fig.suptitle(f"Successful Transition/DC Executions ({model_data['model']['id']}, {_type})", y=1.00)
 
     plt.tight_layout(pad=0.5, w_pad=1.0, h_pad=1.0)
     plt.show()
+
+    # if len(previous_results) > 1:
+    #     target_success_frequency_data = []
+    #     target_success_ratio_data = []
+    #     for a, (b, c) in previous_results.items():
+    #         b["type"] = a
+    #         c["type"] = a
+    #         target_success_frequency_data.append(b)
+    #         target_success_ratio_data.append(c)
+    #     success_frequency_data = pd.concat(target_success_frequency_data)
+    #     success_ratio_data = pd.concat(target_success_ratio_data)
+    #
+    #     root_fig = plt.figure(figsize=(8, 8), dpi=300)
+    #     plot_comparison_boxplot(
+    #         success_frequency_data, success_ratio_data, root_fig,
+    #         title_left="Success Count",
+    #         title_right="Success/Total Ratio",
+    #         x_label_left="Count",
+    #         x_label_right="Percentage",
+    #         hue="type",
+    #     )
+    #     root_fig.suptitle(f"Successful Transition/DC Executions (Comparison)", y=1.00)
+    #     plt.tight_layout(pad=0.5, w_pad=1.0, h_pad=1.0)
+    #     plt.show()
 
 
 def plot_concurrency_heatmap(

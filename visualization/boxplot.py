@@ -2,15 +2,14 @@ import numpy as np
 import pandas
 import seaborn as sns
 from matplotlib import pyplot as plt
-from matplotlib.ticker import MaxNLocator
+from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
 
 def plot_violin(
         data: pandas.DataFrame,
         parent_fig,
         title: str = "Violin Plot",
-        x_label: str = "X Label",
-        input_boxplot_options=None,
+        x_label: str = "X Label"
 ):
     """Plot a violin plot with the given data."""
     # Create a single axis.
@@ -94,6 +93,12 @@ class GridShader:
             self.spans.append(self.ax.axhspan(s, e, zorder=0, **self.kw))
 
 
+# https://stackoverflow.com/a/42156450
+class ScalarFormatterForceFormat(ScalarFormatter):
+    def _set_format(self):
+        self.format = "%1.1f"
+
+
 def plot_comparison_boxplot(
         left_data: pandas.DataFrame,
         right_data: pandas.DataFrame,
@@ -102,7 +107,8 @@ def plot_comparison_boxplot(
         title_right: str = "Box Plot",
         x_label_left: str = "X Label Left",
         x_label_right: str = "X Label Right",
-        y_label: str = "Y Label",
+        y_label: str = None,
+        hue: str = None,
         input_boxplot_options_left=None,
         input_boxplot_options_right=None,
 ):
@@ -116,16 +122,14 @@ def plot_comparison_boxplot(
 
         # Set the default options for each boxplot.
         boxplot_options_left = {
-            "size": 3,
-            "jitter": 0.25,
-            "order": ordering
+            "order": ordering,
+            "linewidth": 0,
         }
         if input_boxplot_options_left is not None:
             boxplot_options_left |= input_boxplot_options_left
         boxplot_options_right = {
-            "size": 3,
-            "jitter": 0.25,
-            "order": ordering
+            "order": ordering,
+            "linewidth": 0,
         }
         if input_boxplot_options_right is not None:
             boxplot_options_right |= input_boxplot_options_right
@@ -134,22 +138,19 @@ def plot_comparison_boxplot(
         ax_left, ax_right = parent_fig.subplots(nrows=1, ncols=2, sharey="row", gridspec_kw={"width_ratios": [1, 1]})
 
         # Plot the boxplot frames.
-        ax_left = sns.stripplot(ax=ax_left, x="value", y="variable", data=left_data, **boxplot_options_left)
-        ax_right = sns.stripplot(ax=ax_right, x="value", y="variable", data=right_data, **boxplot_options_right)
+        ax_left = sns.barplot(ax=ax_left, x="value", y="variable", hue=hue, data=left_data, **boxplot_options_left)
+        ax_right = sns.barplot(ax=ax_right, x="value", y="variable", hue=hue, data=right_data, **boxplot_options_right)
 
-        # Set margins that are appropriate to the target data.
-        ax_left.xaxis.set_major_locator(MaxNLocator(5, min_n_ticks=6, prune="lower"))
+        # Set margins that are appropriate to the target data of the left plot.
+        ax_left.xaxis.set_major_locator(MaxNLocator(5, min_n_ticks=6))
         left_x_ticks = ax_left.get_xticks()
-        if len(left_x_ticks) != 6:
-            left_x_ticks = left_x_ticks[1:]
-            ax_left.set_xticks(left_x_ticks)
         left_x_min = left_x_ticks[0] - 0.125 * (left_x_ticks[1] - left_x_ticks[0])
         left_x_max = left_x_ticks[-1] + 0.125 * (left_x_ticks[1] - left_x_ticks[0])
         if left_data["value"].min() < left_x_min or left_data["value"].max() > left_x_max:
-            raise Exception("Bounds to not conform the the data.")
+            raise Exception("Bounds do not conform the the data.")
         ax_left.set_xlim([left_x_min, left_x_max])
-        ax_left.ticklabel_format(style='sci', scilimits=(0, 1), axis="x")
 
+        # Set margins that are appropriate to the target data of the right plot.
         ax_right.set_xticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
         ax_right.set_xlim([-0.025, 1.025])
 
@@ -171,3 +172,6 @@ def plot_comparison_boxplot(
         ax_right.set_title(title_right)
         ax_right.set_xlabel(x_label_right)
         ax_right.set_ylabel("")
+        ax_left_x_fmt = ScalarFormatterForceFormat()
+        ax_left_x_fmt.set_powerlimits((0, 0))
+        ax_left.xaxis.set_major_formatter(ax_left_x_fmt)
