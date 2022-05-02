@@ -328,7 +328,7 @@ def plot_interval_group_boxplot(
     n = len(target_data.columns)
 
     # Plot the data.
-    root_fig = plt.figure(figsize=(8, 1 + 0.5 * n), dpi=300)
+    root_fig = plt.figure(figsize=(8, 1 + n), dpi=300)
 
     plot_violin_group(
         target_data,
@@ -344,12 +344,6 @@ def plot_interval_group_boxplot(
 
 def plot_message_frequency_interval_correlation_boxplot(model_data: Dict):
     """Plot the correlation coefficients between interval results in the given model results as a box plot."""
-    # Plot globally.
-    # plot_data = model_data["message_frequency"]["intervals"]["table"]
-    # plot_frequency_interval_correlation_boxplot(
-    #     plot_data, f"Message Frequency Correlation Between Target Intervals ({model_data['model']['id']})"
-    # )
-
     # Render a plot for each target group (Global, internal and external comparisons).
     plot_data = model_data["message_frequency"]["intervals"]["table"]
     correlation_table = create_correlation_table(plot_data, method="spearman")
@@ -362,12 +356,6 @@ def plot_message_frequency_interval_correlation_boxplot(model_data: Dict):
 
 def plot_message_frequency_interval_normalized_difference_sum_boxplot(model_data: Dict):
     """Plot the correlation coefficients between interval results in the given model results as a box plot."""
-    # Plot globally.
-    # plot_data = model_data["message_frequency"]["intervals"]["table"]
-    # plot_frequency_interval_normalized_difference_sum_boxplot(
-    #     plot_data, f"Message Frequency NDS Between Target Intervals ({model_data['model']['id']})"
-    # )
-
     # Render a plot for each target group (Global, internal and external comparisons).
     plot_data = model_data["message_frequency"]["intervals"]["table"]
     difference_sum_table = create_difference_sum_table(plot_data)
@@ -404,12 +392,6 @@ def plot_message_order_normalized_difference_sum(model_data: Dict):
 
 def plot_message_order_interval_correlation_boxplot(model_data: Dict, include_individual: bool = False):
     """Plot the correlation coefficients between interval results in the given model results as a box plot."""
-    # Plot globally.
-    # plot_data = model_data["message_order"]["intervals"]["frequency_table"]
-    # plot_frequency_interval_correlation_boxplot(
-    #     plot_data, f"Message Order Correlation Between Target Intervals ({model_data['model']['id']})"
-    # )
-
     # Render a plot for each target group (Global, internal and external comparisons).
     plot_data = model_data["message_order"]["intervals"]["frequency_table"]
     correlation_table = create_correlation_table(plot_data, method="spearman")
@@ -422,12 +404,6 @@ def plot_message_order_interval_correlation_boxplot(model_data: Dict, include_in
 
 def plot_message_order_interval_normalized_difference_sum_boxplot(model_data: Dict, include_individual: bool = False):
     """Plot the correlation coefficients between interval results in the given model results as a box plot."""
-    # Plot globally.
-    # plot_data = model_data["message_order"]["intervals"]["frequency_table"]
-    # plot_frequency_interval_normalized_difference_sum_boxplot(
-    #     plot_data, f"Message Order NDS Between Target Intervals ({model_data['model']['id']})"
-    # )
-
     # Render a plot for each target group (Global, internal and external comparisons).
     plot_data = model_data["message_order"]["intervals"]["frequency_table"]
     difference_sum_table = create_difference_sum_table(plot_data)

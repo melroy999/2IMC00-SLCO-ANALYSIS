@@ -2,7 +2,7 @@ import json
 from os import path, listdir
 from typing import Dict, List
 
-from analysis.model import analyze_model_results
+from analysis.model import analyze_target_model
 from preprocessing.model import preprocess_model_results
 
 
@@ -50,7 +50,7 @@ def analyze_model(target_model: str):
     # Find the folder that contains the model data and the list of associated result entries.
     print(f"Analyzing model {target_model}")
     data = import_model_results(target_model)
-    analyze_model_results(data)
+    analyze_target_model(data)
 
 
 if __name__ == '__main__':

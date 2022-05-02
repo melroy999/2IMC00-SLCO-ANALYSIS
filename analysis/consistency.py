@@ -1,6 +1,6 @@
 from typing import Dict
 
-from visualization.plot import plot_throughput_reports, plot_message_frequency_similarity_report, \
+from visualization.consistency import plot_throughput_reports, plot_message_frequency_similarity_report, \
     plot_thread_workload_balance_report, plot_message_order_similarity_report
 from visualization.table import tabulate_message_frequency_similarity_report
 
@@ -24,6 +24,6 @@ def analyze_model_results_message_order_consistency(model_data: Dict):
 
 def analyze_model_results_consistency(model_data: Dict):
     """Analyze the consistency between the reported model result runs."""
-    # analyze_model_results_log_throughput_consistency(model_data)
+    analyze_model_results_log_throughput_consistency(model_data)
     analyze_model_results_message_frequency_consistency(model_data)
     analyze_model_results_message_order_consistency(model_data)
