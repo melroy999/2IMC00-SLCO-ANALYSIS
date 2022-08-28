@@ -15,7 +15,7 @@ import seaborn
 from matplotlib import pyplot as plt
 
 from analysis.util import create_correlation_table, create_normalized_table, create_difference_sum_table
-from visualization.boxplot import plot_violin, plot_violin_group
+from visualization.categorical import plot_violin, plot_violin_group
 from visualization.heatmap import plot_pcolormesh, plot_corr_heatmap, plot_heatmap
 
 
@@ -33,11 +33,6 @@ def plot_throughput_sum(model_data: Dict, run_id: int, dimensions: Tuple[int, in
         data_dimensions=dimensions
     )
     plt.tight_layout(pad=0.5, w_pad=1.0, h_pad=1.0)
-
-    # import tikzplotlib
-    # tikzplotlib.save("figure.pgf", dpi=300)
-    # plt.savefig("histogram.pgf")
-
     plt.show()
 
 

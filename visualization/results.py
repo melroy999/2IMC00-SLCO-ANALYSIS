@@ -4,7 +4,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.ticker import FuncFormatter
 
-from visualization.boxplot import plot_comparison_boxplot
+from visualization.categorical import plot_comparison_boxplot
 from visualization.heatmap import plot_heatmap
 
 
@@ -29,7 +29,7 @@ def get_revised_index_names(data: pd.DataFrame, abbreviation: Dict) -> Dict:
 # previous_results = dict()
 
 
-def plot_transition_frequency_boxplot(frequency_data: pd.DataFrame, model_data: Dict, _type: str = "Logging"):
+def plot_transition_frequency_boxplot(frequency_data: pd.DataFrame, model_data: Dict, _type: str = "Logging Intervals"):
     """Plot the transition frequencies recorded in the model."""
     # Plot the number of successful transitions and the percentage of successful transitions side by side in a boxplot.
     opening_frequency_data = frequency_data[frequency_data.index.str.endswith("O")]
@@ -66,7 +66,18 @@ def plot_transition_frequency_boxplot(frequency_data: pd.DataFrame, model_data: 
     root_fig.suptitle(f"Successful Transition/DC Executions ({model_data['model']['id']}, {_type})", y=1.00)
 
     plt.tight_layout(pad=0.5, w_pad=1.0, h_pad=1.0)
-    plt.show()
+
+    # with plt.rc_context({
+    #     # "pgf.texsystem": "pdflatex",
+    #     # 'font.family': 'serif',
+    #     'text.usetex': True,
+    #     'pgf.rcfonts': False,
+    # }):
+    #     import tikzplotlib
+    #     # tikzplotlib.save("comparison.tex", dpi=300)
+    #     plt.savefig("comparison.pgf")
+    #
+    # plt.show()
 
     # if len(previous_results) > 1:
     #     target_success_frequency_data = []

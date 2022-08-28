@@ -1,15 +1,18 @@
 from typing import Dict
 
-import networkx as nx
 import pandas as pd
 
-from visualization.results import plot_concurrency_heatmap, plot_local_concurrency_heatmap, \
+from analysis.util import create_normalized_table
+from visualization.results import plot_local_concurrency_heatmap, \
     plot_global_concurrency_heatmap, plot_transition_frequency_boxplot
 
 
 def analyze_counting_model_message_frequency_results(model_data: Dict):
     """Analyze the message frequency data attained during the counting-based model runs."""
     # Use a boxplot, since we do not have enough entries for a violin plot.
+    target_columns = model_data["message_frequency"]["global"]["targets"]["counting"]
+    frequency_data = model_data["message_frequency"]["global"]["table"][target_columns]
+    plot_transition_frequency_boxplot(frequency_data, model_data, _type="Counting")
 
 
 def analyze_logging_model_message_frequency_results(model_data: Dict):

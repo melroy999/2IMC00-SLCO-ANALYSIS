@@ -1,6 +1,8 @@
 import numpy as np
 import pandas
 import seaborn as sns
+
+import matplotlib
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
@@ -46,7 +48,6 @@ def plot_violin_group(
 
     # Plot the data frame as a color mesh plot.
     ax = sns.violinplot(ax=ax, data=data, inner="quartile", orient="h", scale="width", cut=0, color=".8")
-    # ax = sns.swarmplot(ax=ax, data=data, edgecolor="gray", orient="h", size=3)
     ax = sns.stripplot(ax=ax, data=data, edgecolor="gray", orient="h", size=3, jitter=0.25)
 
     # Decorate the figure with the appropriate titles and axis labels.
