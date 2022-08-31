@@ -7,10 +7,12 @@ from matplotlib import pyplot as plt
 from visualization.figures.barplot import plot_two_column_barplot, set_numeric_margins, \
     set_percentage_margins, set_logarithmic_margins, create_ordering_mask
 
-# Constants.
 from visualization.figures.heatmap import plot_pcolormesh
-from visualization.figures.table import render_table
+from visualization.figures.table import render_tabular
+from visualization.saving import save_plot_as_pgf, save_plot_as_png, save_table_as_tex, save_png_figure_as_tex, \
+    save_pgf_figure_as_tex
 
+# Constants.
 plot_width = 10
 
 
@@ -113,7 +115,12 @@ def extract_success_data(frequency_data: pd.DataFrame, model_data: Dict, _type: 
     return success_frequency_data, success_ratio_data
 
 
-def plot_transition_frequency_boxplot(frequency_data: pd.DataFrame, model_data: Dict, title: str):
+def plot_transition_frequency_boxplot(
+        frequency_data: pd.DataFrame,
+        model_data: Dict,
+        target_model: str,
+        file_name: str = None
+):
     """Plot the transition frequencies recorded in the model."""
     # Plot the number of successful transitions and the percentage of successful transitions side by side in a boxplot.
     success_frequency_data, success_ratio_data = extract_success_data(frequency_data, model_data)
@@ -130,32 +137,35 @@ def plot_transition_frequency_boxplot(frequency_data: pd.DataFrame, model_data: 
         left_margin_function=set_numeric_margins,
         right_margin_function=set_percentage_margins
     )
-    root_fig.suptitle(title, y=1.00)
+    root_fig.suptitle(f"Successful Transition Executions ({target_model})", y=1.00)
 
     plt.tight_layout(pad=0.5, w_pad=1.0, h_pad=1.0)
 
-    plt.show()
+    if file_name is not None:
+        target_pgf_figure = save_plot_as_pgf(target_model, file_name)
+        save_plot_as_png(target_model, file_name)
+        save_pgf_figure_as_tex(
+            target_model,
+            target_pgf_figure,
+            "Caption",
+            f"figure:{file_name}_{target_model.lower()}",
+            f"{file_name}"
+        )
+    else:
+        plt.show()
 
-    # with plt.rc_context({
-    #     # "pgf.texsystem": "pdflatex",
-    #     # 'font.family': 'serif',
-    #     'text.usetex': True,
-    #     'pgf.rcfonts': False,
-    # }):
-    #     import tikzplotlib
-    #     # tikzplotlib.save("comparison.tex", dpi=300)
-    #     plt.savefig("comparison.pgf")
-    #
-    # plt.show()
+    plt.close("all")
 
 
 def plot_transition_frequency_comparison_boxplot(
         frequency_data: Dict[str, pd.DataFrame],
         model_data: Dict,
-        title: str,
+        target_model: str,
+        file_name: str = None,
         y_scale: int = 10,
         log_scale: bool = False,
-        legend_title: str = "Configuration"
+        legend_title: str = "Configuration",
+
 ):
     """Plot the transition frequencies recorded in the given models."""
     # Plot the number of successful transitions and the percentage of successful transitions side by side in a boxplot.
@@ -176,20 +186,27 @@ def plot_transition_frequency_comparison_boxplot(
         left_margin_function=set_logarithmic_margins if log_scale else set_numeric_margins,
         right_margin_function=set_percentage_margins
     )
-    root_fig.suptitle(title, y=1.00)
+    root_fig.suptitle(f"Successful Transition Executions ({target_model})", y=1.00)
 
     # Put the legend outside of the plot.
     plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., title=legend_title)
 
     plt.tight_layout(pad=0.5, w_pad=1.0, h_pad=1.0)
 
-    with plt.rc_context({
-        'text.usetex': True,
-        'pgf.rcfonts': False,
-    }):
-        plt.savefig("comparison.pgf")
+    if file_name is not None:
+        target_pgf_figure = save_plot_as_pgf(target_model, file_name)
+        save_plot_as_png(target_model, file_name)
+        save_pgf_figure_as_tex(
+            target_model,
+            target_pgf_figure,
+            "Caption",
+            f"figure:{file_name}_{target_model.lower()}",
+            f"{file_name}"
+        )
+    else:
+        plt.show()
 
-    plt.show()
+    plt.close("all")
 
 
 def get_state_machine_mask(v):
@@ -206,7 +223,12 @@ def extract_state_machine_level_data(frequency_data):
     return state_machine_frequency_data
 
 
-def plot_state_machine_frequency_boxplot(frequency_data: pd.DataFrame, model_data: Dict, title: str):
+def plot_state_machine_frequency_boxplot(
+        frequency_data: pd.DataFrame,
+        model_data: Dict,
+        target_model: str,
+        file_name: str = None
+):
     """Plot the state machine frequencies recorded in the model."""
     # Plot the number of transitions and the successful transitions side by side in a boxplot grouped by state machine.
     sm_frequency_data = extract_state_machine_level_data(frequency_data)
@@ -224,17 +246,31 @@ def plot_state_machine_frequency_boxplot(frequency_data: pd.DataFrame, model_dat
         left_margin_function=set_numeric_margins,
         right_margin_function=set_numeric_margins
     )
-    root_fig.suptitle(title, y=1.00)
+    root_fig.suptitle(f"Transition Executions ({target_model})", y=1.00)
 
     plt.tight_layout(pad=0.5, w_pad=1.0, h_pad=1.0)
 
-    plt.show()
+    if file_name is not None:
+        target_pgf_figure = save_plot_as_pgf(target_model, file_name)
+        save_plot_as_png(target_model, file_name)
+        save_pgf_figure_as_tex(
+            target_model,
+            target_pgf_figure,
+            "Caption",
+            f"figure:{file_name}_{target_model.lower()}",
+            f"{file_name}"
+        )
+    else:
+        plt.show()
+
+    plt.close("all")
 
 
 def plot_state_machine_frequency_comparison_boxplot(
         frequency_data: Dict[str, pd.DataFrame],
         model_data: Dict,
-        title: str,
+        target_model: str,
+        file_name: str = None,
         y_scale: int = 4,
         log_scale: bool = False,
         legend_title: str = "Configuration"
@@ -259,24 +295,44 @@ def plot_state_machine_frequency_comparison_boxplot(
         left_margin_function=set_logarithmic_margins if log_scale else set_numeric_margins,
         right_margin_function=set_logarithmic_margins if log_scale else set_numeric_margins,
     )
-    root_fig.suptitle(title, y=1.00)
+    root_fig.suptitle(f"Transition Executions ({target_model})", y=1.00)
 
     # Put the legend outside of the plot.
     plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., title=legend_title)
 
     plt.tight_layout(pad=0.5, w_pad=1.0, h_pad=1.0)
 
-    plt.show()
+    if file_name is not None:
+        target_pgf_figure = save_plot_as_pgf(target_model, file_name)
+        save_plot_as_png(target_model, file_name)
+        save_pgf_figure_as_tex(
+            target_model,
+            target_pgf_figure,
+            "Caption",
+            f"figure:{file_name}_{target_model.lower()}",
+            f"{file_name}"
+        )
+    else:
+        plt.show()
+
+    plt.close("all")
 
 
-def plot_throughput_sum(model_data: Dict, run_id: int, dimensions: Tuple[int, int], max_value: int):
+def plot_throughput_sum(
+        model_data: Dict,
+        run_id: int,
+        dimensions: Tuple[int, int],
+        max_value: int,
+        target_model: str,
+        file_name: str = None
+):
     """Plot a color mesh depicting the per file global throughput data for the given model run."""
     root_fig = plt.figure(figsize=(10, 3.5), dpi=300)
     plot_data = model_data["log_frequency"]["files"]["sum"][run_id].transpose()
     plot_pcolormesh(
         plot_data,
         root_fig,
-        title=f"Logging Throughput Sum ({model_data['model']['id']}, Run \\#{run_id})",
+        title=f"Logging Throughput Sum ({target_model}, Run {run_id})",
         x_label="Timestamp (ms)",
         y_label="File Number",
         c_bar_label="Frequency",
@@ -286,17 +342,37 @@ def plot_throughput_sum(model_data: Dict, run_id: int, dimensions: Tuple[int, in
         }
     )
     plt.tight_layout(pad=0.5, w_pad=1.0, h_pad=1.0)
-    plt.show()
+
+    if file_name is not None:
+        target_png_figure = save_plot_as_png(target_model, f"{file_name}_{run_id}")
+        save_png_figure_as_tex(
+            target_model,
+            target_png_figure,
+            "Caption",
+            f"figure:{file_name}_{target_model.lower()}_{run_id}",
+            f"{file_name}_{run_id}"
+        )
+    else:
+        plt.show()
+
+    plt.close("all")
 
 
-def plot_throughput_difference(model_data: Dict, run_id: int, dimensions: Tuple[int, int], max_value: int):
+def plot_throughput_difference(
+        model_data: Dict,
+        run_id: int,
+        dimensions: Tuple[int, int],
+        max_value: int,
+        target_model: str,
+        file_name: str = None
+):
     """Plot a color mesh depicting the sum difference to the row minimum throughput for the given model run."""
     root_fig = plt.figure(figsize=(10, 3.5), dpi=300)
     plot_data = model_data["log_frequency"]["files"]["difference"][run_id].transpose()
     plot_pcolormesh(
         plot_data,
         root_fig,
-        title=f"Logging Throughput Difference ({model_data['model']['id']}, Run \\#{run_id})",
+        title=f"Logging Throughput Difference ({target_model}, Run {run_id})",
         x_label="Timestamp (ms)",
         y_label="File Number",
         c_bar_label="Sum Difference To Row Minimum",
@@ -306,18 +382,31 @@ def plot_throughput_difference(model_data: Dict, run_id: int, dimensions: Tuple[
         }
     )
     plt.tight_layout(pad=0.5, w_pad=1.0, h_pad=1.0)
-    plt.show()
+
+    if file_name is not None:
+        target_png_figure = save_plot_as_png(target_model, f"{file_name}_{run_id}")
+        save_png_figure_as_tex(
+            target_model,
+            target_png_figure,
+            "Caption",
+            f"figure:{file_name}_{target_model.lower()}_{run_id}",
+            f"{file_name}_{run_id}"
+        )
+    else:
+        plt.show()
+
+    plt.close("all")
 
 
 def plot_throughput_report(
-        model_data: Dict, run_id: int, dimensions: Tuple[int, int], max_sum: int, max_difference: int
+        model_data: Dict, run_id: int, dimensions: Tuple[int, int], max_sum: int, max_difference: int, target_model: str
 ):
     """Plot a logging throughput report for the given model run."""
-    plot_throughput_sum(model_data, run_id, dimensions, max_sum)
-    plot_throughput_difference(model_data, run_id, dimensions, max_difference)
+    plot_throughput_sum(model_data, run_id, dimensions, max_sum, target_model, "throughput_sum")
+    plot_throughput_difference(model_data, run_id, dimensions, max_difference, target_model, "throughput_difference")
 
 
-def plot_throughput_reports(model_data: Dict):
+def plot_throughput_reports(model_data: Dict, target_model: str):
     """Plot a logging throughput report for the given model results."""
     max_nr_of_timestamps = max(x.shape[0] for x in model_data["log_frequency"]["files"]["sum"])
     max_nr_of_files = max(x.shape[1] for x in model_data["log_frequency"]["files"]["sum"])
@@ -327,7 +416,7 @@ def plot_throughput_reports(model_data: Dict):
     max_difference = int(max(np.nanmax(v.to_numpy()) for v in model_data["log_frequency"]["files"]["difference"]))
 
     for i, _ in enumerate(model_data["log_frequency"]["files"]["sum"]):
-        plot_throughput_report(model_data, i, data_dimensions, max_sum, max_difference)
+        plot_throughput_report(model_data, i, data_dimensions, max_sum, max_difference, target_model)
 
 
 def format_index(v):
@@ -338,8 +427,8 @@ def format_index(v):
         return f"\\hspace{{3mm}}{v}"
 
 
-def plot_frequency_results_table(input_data: pd.DataFrame, model_data: Dict):
-    """Plot the results rendered within the given table."""
+def get_model_statistics_table(input_data: pd.DataFrame, model_data: Dict):
+    """Get a summary table containing the statistics for the given data frame."""
     # Create a copy, such that the original remains unaltered.
     input_data = input_data.copy()
 
@@ -350,11 +439,11 @@ def plot_frequency_results_table(input_data: pd.DataFrame, model_data: Dict):
     frequency_statistics = frequency_data.groupby(["message"]).agg(
         mean=("value", "mean"), std=("value", "std")
     )
-    frequency_statistics.rename(columns={"mean": "$\\mu(t)$", "std": "$\\sigma(t)$"}, inplace=True)
+    frequency_statistics.rename(columns={"mean": "$\\mu(e)$", "std": "$\\sigma(e)$"}, inplace=True)
     success_frequency_statistics = success_frequency_data.groupby(["message"]).agg(
         mean=("value", "mean"), std=("value", "std")
     )
-    success_frequency_statistics.rename(columns={"mean": "$\\mu(st)$", "std": "$\\sigma(st)$"}, inplace=True)
+    success_frequency_statistics.rename(columns={"mean": "$\\mu(se)$", "std": "$\\sigma(se)$"}, inplace=True)
     success_ratio_statistics = success_ratio_data.groupby(["message"]).agg(
         mean=("value", "mean"), std=("value", "std")
     )
@@ -366,30 +455,55 @@ def plot_frequency_results_table(input_data: pd.DataFrame, model_data: Dict):
     result_table = result_table.reindex(list(sorted(set(result_table.index), key=create_ordering_mask)))
     result_table.index = result_table.index.map(format_index)
 
-    latex_code = render_table(result_table)
-    latex_code = latex_code.replace("{}", "Target")
-    latex_code_lines = latex_code.splitlines(keepends=True)
-    latex_code_lines[3] = latex_code_lines[2]
-    latex_code_lines[2] = \
-        f"\\multicolumn{{{latex_code_lines[3].count('&') + 1}}}{{c}}{{Performance results for target model `\\texttt{{CounterDistributorExact.i}}' $(n={len(input_data.columns)}, t=30)$}} \\\\[2mm]\n"
-    latex_code_lines[5] = latex_code_lines[5][8:]
-    latex_code = ''.join(latex_code_lines)
-
-    latex_code = encapsulate_tabular_with_table(latex_code)
-
-    print(latex_code)
+    return result_table
 
 
-def encapsulate_tabular_with_table(latex_code: str) -> str:
-    """Encapsulate the given tabular object with a table object."""
-    lines = [
-        "\\begin{table}[htbp]",
-        "\\centering",
-        "\\resizebox{\\columnwidth}{!}{ %",
-        latex_code.strip(),
-        "}",
-        "\\caption{}",
-        "\\label{}",
-        "\\end{table}"
-    ]
-    return "\n".join(lines)
+def reformat_tabular_header(tabular_code: str, title: str, target_header: str = "Target"):
+    """Reformat the header of the given tabular."""
+    tabular_code = tabular_code.replace("{}", target_header)
+    tabular_code_lines = tabular_code.splitlines(keepends=True)
+    tabular_code_lines[3] = tabular_code_lines[2]
+    tabular_code_lines[2] = \
+        f"\\multicolumn{{{tabular_code_lines[3].count('&') + 1}}}{{c}}{{{title}}} \\\\[2mm]\n"
+    tabular_code_lines[5] = tabular_code_lines[5][8:]
+    return ''.join(tabular_code_lines)
+
+
+def plot_frequency_results_table(
+        input_data: pd.DataFrame,
+        model_data: Dict,
+        target_model: str,
+        category: str = None,
+        caption_addendum: str = None
+):
+    """Plot the results rendered within the given table."""
+    # Gather all the summary statistics.
+    result_table = get_model_statistics_table(input_data, model_data)
+
+    # Create the table and make corrections to its formatting.
+    tabular_code = render_tabular(result_table)
+    model_details = f"n={len(input_data.columns)}, t=30"
+    if category is not None:
+        model_details += f", {category}"
+
+    title = f"Performance results for target model \\texttt{{{target_model}}} $({model_details})$"
+    tabular_code = reformat_tabular_header(tabular_code, title)
+
+    # Render the table as a file with an appropriate caption and label.
+    caption = \
+        f"A table containing statistics on the number of executions $(e)$, number of successful executions $(se)$ " \
+        f"and success ratio $(sr)$ measured during the execution of the target model \\texttt{{{target_model}}}. The " \
+        f"results have been measured over a time span of 30 seconds, where each entry is represented by measurements " \
+        f"taken over {len(input_data.columns)} trials."
+    if caption_addendum is not None:
+        caption += f" {caption_addendum}"
+
+    label = f"table:frequency_results_{target_model.lower()}"
+    if category is not None:
+        label += f"_{category.lower()}"
+
+    file_name = f"frequency_results"
+    if category is not None:
+        file_name += f"_{category.lower()}"
+
+    save_table_as_tex(target_model, tabular_code, caption, label, file_name)

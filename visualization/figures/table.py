@@ -13,7 +13,7 @@ def float_notation(float_number):
         return f"${base} \\cdot 10^{{{int(exponent)}}}$"
 
 
-def render_table(data: pandas.DataFrame) -> str:
+def render_tabular(data: pandas.DataFrame) -> str:
     """Render the data in the given table as a latex object."""
     with pandas.option_context("max_colwidth", 1000):
         latex_code = data.to_latex(
