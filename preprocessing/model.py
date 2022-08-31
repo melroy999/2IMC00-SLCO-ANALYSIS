@@ -11,7 +11,7 @@ def preprocess_model_information(model_results: Dict, target_model: str) -> Dict
     """Get the model that is tested and verify if all results are of the same model."""
     aggregate_results = [v for v in model_results["logging"] + model_results["counting"]]
     if len(model_results["logging"]) == 0:
-        raise Exception("The required logging-based model data is available.")
+        raise Exception("The required logging-based model data is unavailable.")
 
     # Verify that all of the results have the same model as a source.
     if not all(v["model"] == aggregate_results[0]["model"] for v in aggregate_results[1:]):
@@ -162,7 +162,9 @@ def create_aggregate_message_frequency_table(target_data_frames: List[pd.DataFra
     return aggregate_table[~(aggregate_table == 0).all(axis=1)]
 
 
-def preprocess_model_message_frequency_data(model_results: Dict, model_information: Dict) -> Dict:
+def preprocess_model_message_frequency_data(
+        model_results: Dict, model_information: Dict, include_logging: bool
+) -> Dict:
     """Preprocess all the message frequency related data and convert the found results into aggregate data."""
     # Convert all counting-based message frequency data to data frames.
     counting_target_columns = []
@@ -176,66 +178,80 @@ def preprocess_model_message_frequency_data(model_results: Dict, model_informati
         counting_data_frames[-1].index.name = "message"
         counting_target_columns.append(column_name)
 
-    # Convert all logging-based message frequency global data to data frames.
-    logging_target_columns = []
-    logging_data_frames = []
-    for i, run_data in enumerate(model_results["logging"]):
-        # Convert all global data to data frames.
-        column_name = f"logging_frequency_{i}"
-        frequency_data = run_data["message_data"]["global_data"]["event_count"]
-        frequency_data = preprocess_message_frequency_table(frequency_data, model_information)
-        logging_data_frames.append(
-            pd.DataFrame.from_dict(frequency_data, orient="index", columns=[column_name])
-        )
-        logging_target_columns.append(column_name)
-
-    # Convert all logging-based message frequency interval data to data frames.
-    logging_interval_target_columns = defaultdict(list)
-    logging_interval_data_frames = []
-    logging_interval_settings = None
-    for i, run_data in enumerate(model_results["logging"]):
-        # Check if settings are equal.
-        local_logging_interval_settings = {
-            "interval": run_data["message_data"]["interval"],
-            "start": run_data["message_data"]["start"],
-            "end": run_data["message_data"]["end"]
-        }
-        if logging_interval_settings is None:
-            logging_interval_settings = local_logging_interval_settings
-        elif logging_interval_settings != local_logging_interval_settings:
-            raise Exception("The interval ranges are not equal between runs.")
-
-        # Convert all interval data to data frames.
-        for interval_data in run_data["message_data"]["intervals"]:
-            column_name = f"frequency_{i}_i_{interval_data['start']}_{interval_data['end']}"
-            frequency_data = interval_data["data"]["event_count"]
+    if include_logging:
+        # Convert all logging-based message frequency global data to data frames.
+        logging_target_columns = []
+        logging_data_frames = []
+        for i, run_data in enumerate(model_results["logging"]):
+            # Convert all global data to data frames.
+            column_name = f"logging_frequency_{i}"
+            frequency_data = run_data["message_data"]["global_data"]["event_count"]
             frequency_data = preprocess_message_frequency_table(frequency_data, model_information)
-            logging_interval_data_frames.append(
+            logging_data_frames.append(
                 pd.DataFrame.from_dict(frequency_data, orient="index", columns=[column_name])
             )
-            logging_interval_target_columns[(interval_data["start"], interval_data["end"])].append(column_name)
+            logging_target_columns.append(column_name)
 
-    # Merge all the global data frames.
-    aggregate_global_frequency_data = {
-        "targets": {
-            "counting": counting_target_columns,
-            "logging": logging_target_columns
-        },
-        "table": create_aggregate_message_frequency_table(counting_data_frames + logging_data_frames)
-    }
+        # Convert all logging-based message frequency interval data to data frames.
+        logging_interval_target_columns = defaultdict(list)
+        logging_interval_data_frames = []
+        logging_interval_settings = None
+        for i, run_data in enumerate(model_results["logging"]):
+            # Check if settings are equal.
+            local_logging_interval_settings = {
+                "interval": run_data["message_data"]["interval"],
+                "start": run_data["message_data"]["start"],
+                "end": run_data["message_data"]["end"]
+            }
+            if logging_interval_settings is None:
+                logging_interval_settings = local_logging_interval_settings
+            elif logging_interval_settings != local_logging_interval_settings:
+                raise Exception("The interval ranges are not equal between runs.")
 
-    # Merge all interval data frames.
-    aggregate_interval_frequency_data = {
-        "settings": logging_interval_settings,
-        "targets": logging_interval_target_columns,
-        "table": create_aggregate_message_frequency_table(logging_interval_data_frames)
-    }
+            # Convert all interval data to data frames.
+            for interval_data in run_data["message_data"]["intervals"]:
+                column_name = f"frequency_{i}_i_{interval_data['start']}_{interval_data['end']}"
+                frequency_data = interval_data["data"]["event_count"]
+                frequency_data = preprocess_message_frequency_table(frequency_data, model_information)
+                logging_interval_data_frames.append(
+                    pd.DataFrame.from_dict(frequency_data, orient="index", columns=[column_name])
+                )
+                logging_interval_target_columns[(interval_data["start"], interval_data["end"])].append(column_name)
 
-    # Combine the data in a convenient data structure.
-    return {
-        "global": aggregate_global_frequency_data,
-        "intervals": aggregate_interval_frequency_data
-    }
+        # Merge all the global data frames.
+        aggregate_global_frequency_data = {
+            "targets": {
+                "counting": counting_target_columns,
+                "logging": logging_target_columns
+            },
+            "table": create_aggregate_message_frequency_table(counting_data_frames + logging_data_frames)
+        }
+
+        # Merge all interval data frames.
+        aggregate_interval_frequency_data = {
+            "settings": logging_interval_settings,
+            "targets": logging_interval_target_columns,
+            "table": create_aggregate_message_frequency_table(logging_interval_data_frames)
+        }
+
+        # Combine the data in a convenient data structure.
+        return {
+            "global": aggregate_global_frequency_data,
+            "intervals": aggregate_interval_frequency_data
+        }
+    else:
+        # Merge all the global data frames.
+        aggregate_global_frequency_data = {
+            "targets": {
+                "counting": counting_target_columns
+            },
+            "table": create_aggregate_message_frequency_table(counting_data_frames)
+        }
+
+        # Combine the data in a convenient data structure.
+        return {
+            "global": aggregate_global_frequency_data
+        }
 
 
 def create_aggregate_message_order_table(target_data_frames: List[pd.DataFrame]) -> pd.DataFrame:
@@ -349,22 +365,35 @@ def preprocess_model_message_succession_data(
     }
 
 
-def preprocess_model_data(model_results: Dict, model_information: Dict) -> Dict:
+def preprocess_model_data(
+        model_results: Dict,
+        model_information: Dict,
+        include_logging: bool
+) -> Dict:
     """Preprocess all the data and convert the found results into aggregate data."""
-    return {
-        "log_frequency": preprocess_model_log_frequency_data(model_results, model_information),
-        "message_frequency": preprocess_model_message_frequency_data(model_results, model_information),
-        "message_order": preprocess_model_message_succession_data(model_results, model_information)
+    result = {
+        "message_frequency": preprocess_model_message_frequency_data(model_results, model_information, include_logging)
     }
+    if include_logging:
+        result |= {
+            "log_frequency": preprocess_model_log_frequency_data(model_results, model_information),
+            # TODO: Disabled due to log frequency data deemed to not be representative.
+            # "message_order": preprocess_model_message_succession_data(model_results, model_information)
+        }
+    return result
 
 
-def preprocess_model_results(model_results: Dict, target_model: str) -> Dict:
+def preprocess_model_results(
+        model_results: Dict,
+        target_model: str,
+        include_logging: bool
+) -> Dict:
     """Preprocess the given data such that it can be used in the analysis and presentation of results."""
     # Preprocess the model information and target data.
     model_information = preprocess_model_information(model_results, target_model)
 
     # Preprocess the target data.
-    model_data = preprocess_model_data(model_results, model_information)
+    model_data = preprocess_model_data(model_results, model_information, include_logging)
 
     return {
         "model": model_information,

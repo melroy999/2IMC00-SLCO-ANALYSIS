@@ -2,13 +2,14 @@ import json
 from os import path, listdir
 from typing import Dict, List
 
-from analysis.model import analyze_target_model
 from preprocessing.model import preprocess_model_results
+from visualization.plots import plot_transition_frequency_boxplot, plot_transition_frequency_comparison_boxplot, \
+    plot_state_machine_frequency_comparison_boxplot, plot_throughput_reports, plot_frequency_results_table
 
 
 def import_data(target: str) -> Dict:
     """Import the json data associated with the given run of the target model."""
-    with open(path.join(target, "results.json"), 'r') as f:
+    with open(path.join(target, "results.json"), "r") as f:
         return json.load(f)
 
 
@@ -32,27 +33,104 @@ def import_counting_results(model_path: str) -> List:
     return [import_data(path.join(target_path, result_entry)) for result_entry in result_entries]
 
 
-def import_model_results(target_model: str) -> Dict:
+def import_model_results(target_model: str, include_logging: bool = False) -> Dict:
     """Import all results of the given model."""
     # Find the folder that contains the model data and the list of associated result entries.
     model_path = path.join("results", target_model)
     model_results = {
-        "logging": import_logging_results(model_path),
-        "counting": import_counting_results(model_path)
+        "counting": import_counting_results(model_path),
+        "logging": import_logging_results(model_path)
     }
 
     # Preprocess the results.
-    return preprocess_model_results(model_results, target_model)
+    return preprocess_model_results(model_results, target_model, include_logging)
 
 
-def analyze_model(target_model: str):
-    """Analyze the results found for each run of the given model."""
-    # Find the folder that contains the model data and the list of associated result entries.
-    print(f"Analyzing model {target_model}")
-    data = import_model_results(target_model)
-    analyze_target_model(data)
+def analyze_counting_logging_distribution(model_data, target_model_name: str):
+    """Analyze the transition distributions of the counting and logging measurements of a model."""
+    counting_columns = model_data["message_frequency"]["global"]["targets"]["counting"]
+    logging_columns = model_data["message_frequency"]["global"]["targets"]["logging"]
+    counting_frequency_data = model_data["message_frequency"]["global"]["table"][counting_columns]
+    logging_frequency_data = model_data["message_frequency"]["global"]["table"][logging_columns]
+
+    categories = {
+        "Counting": counting_frequency_data,
+        "Logging": logging_frequency_data,
+    }
+
+    plot_transition_frequency_comparison_boxplot(
+        categories,
+        model_data,
+        f"Successful Transition Executions ({target_model_name})",
+        log_scale=True,
+        legend_title="Measurement Type"
+    )
+
+    plot_state_machine_frequency_comparison_boxplot(
+        categories,
+        model_data,
+        f"Transition Executions ({target_model_name})",
+        log_scale=True,
+        legend_title="Measurement Type"
+    )
 
 
-if __name__ == '__main__':
-    analyze_model("Elevator[T=60s,URP]")
-    analyze_model("Elevator[T=60s]")
+def analyze_elevator_models():
+    """Analyze the elevator model instances."""
+    model_data = import_model_results("Elevator[T=60s]_old", include_logging=True)
+
+    target_columns = model_data["message_frequency"]["global"]["targets"]["counting"]
+    frequency_data = model_data["message_frequency"]["global"]["table"][target_columns]
+
+    # plot_frequency_results_table(frequency_data, model_data)
+
+    categories = {
+        "A": frequency_data,
+        "B": frequency_data,
+        "C": frequency_data,
+        "D": frequency_data
+    }
+
+    plot_transition_frequency_comparison_boxplot(
+        categories, model_data, f"Successful Transition Executions (Elevator)"
+    )
+
+    plot_state_machine_frequency_comparison_boxplot(
+        categories, model_data, f"Transition Executions (Elevator)"
+    )
+
+    analyze_counting_logging_distribution(model_data, "Elevator")
+
+    # plot_throughput_reports(model_data)
+
+
+def analyze_synthetic_test_tokens_models():
+    """Analyze the elevator model instances."""
+    model_data = import_model_results("SyntheticTestTokens[T=60s]_old", include_logging=True)
+
+    target_columns = model_data["message_frequency"]["global"]["targets"]["counting"]
+    frequency_data = model_data["message_frequency"]["global"]["table"][target_columns]
+
+    categories = {
+        "A": frequency_data,
+        "B": frequency_data,
+        "C": frequency_data,
+        "D": frequency_data
+    }
+
+    plot_transition_frequency_comparison_boxplot(
+        categories, model_data, f"Successful Transition Executions (SyntheticTestTokens)"
+    )
+
+    plot_state_machine_frequency_comparison_boxplot(
+        categories, model_data, f"Transition Executions (SyntheticTestTokens)"
+    )
+
+    analyze_counting_logging_distribution(model_data, "SyntheticTestTokens")
+
+    # plot_throughput_reports(model_data)
+
+
+if __name__ == "__main__":
+    analyze_elevator_models()
+    analyze_synthetic_test_tokens_models()
