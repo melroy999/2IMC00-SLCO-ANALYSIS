@@ -3,8 +3,7 @@ import pandas
 
 from matplotlib import pyplot as plt
 import seaborn as sns
-from matplotlib.ticker import MaxNLocator, ScalarFormatter
-import matplotlib.ticker as mtick
+from matplotlib.ticker import MaxNLocator, ScalarFormatter, PercentFormatter, LogLocator
 
 
 # https://stackoverflow.com/a/54654448
@@ -62,8 +61,8 @@ def set_numeric_margins(ax, values):
     """Set the default margins for a numeric value type."""
     ax.xaxis.set_major_locator(MaxNLocator(nbins=5, min_n_ticks=6))
     x_ticks = ax.get_xticks()
-    x_min = x_ticks[0] - 0.125 * (x_ticks[1] - x_ticks[0])
-    x_max = x_ticks[-1] + 0.125 * (x_ticks[1] - x_ticks[0])
+    x_min = x_ticks[0]
+    x_max = x_ticks[-1]
     if values.min() < x_min or values.max() > x_max:
         raise Exception("Bounds do not conform the the data.")
     ax.set_xlim([x_min, x_max])
@@ -72,16 +71,14 @@ def set_numeric_margins(ax, values):
 def set_percentage_margins(ax, _):
     """Set the default margins for a percentage value type."""
     ax.set_xticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
-    ax.set_xlim([-0.025, 1.025])
-    ax.xaxis.set_major_formatter(mtick.PercentFormatter(1.0))
+    ax.set_xlim([0, 1])
+    ax.xaxis.set_major_formatter(PercentFormatter(1.0))
 
 
 def set_logarithmic_margins(ax, _):
     """Set the default margins for a logarithmic scale."""
-    # ax.set_xticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
-    # ax.set_xlim([-0.025, 1.025])
-    # ax.xaxis.set_major_formatter(mtick.PercentFormatter(1.0))
     ax.set_xscale("log")
+    ax.xaxis.set_major_locator(LogLocator())
 
 
 def highlight_decision_node(ax):

@@ -32,19 +32,36 @@ def save_plot_as_png(target_model: str, file_name: str) -> str:
 
 
 def save_table_as_tex(
-        target_model: str, table_contents: str, caption: str, label: str, file_name: str, float_modifier: str = "htbp"
+        target_model: str,
+        table_contents: str,
+        caption: str,
+        label: str,
+        file_name: str,
+        float_modifier: str = "htbp",
+        include_resize_box: bool = True
 ):
     """Save the given latex table at the given location as a tex file."""
-    lines = [
-        f"\\begin{{table}}[{float_modifier}]",
-        "\\centering",
-        "\\resizebox{\\columnwidth}{!}{ %",
-        table_contents.strip(),
-        "}",
-        f"\\caption{{{caption}}}",
-        f"\\label{{{label}}}",
-        "\\end{table}"
-    ]
+    if include_resize_box:
+        lines = [
+            f"\\begin{{table}}[{float_modifier}]",
+            "\\centering",
+            "\\resizebox{\\columnwidth}{!}{ %",
+            table_contents.strip(),
+            "}",
+            f"\\caption{{{caption}}}",
+            f"\\label{{{label}}}",
+            "\\end{table}"
+        ]
+    else:
+        lines = [
+            f"\\begin{{table}}[{float_modifier}]",
+            "\\centering",
+            table_contents.strip(),
+            f"\\caption{{{caption}}}",
+            f"\\label{{{label}}}",
+            "\\end{table}"
+        ]
+
     file_contents = "\n".join(lines)
 
     target_path = os.path.join("tables", target_model)
@@ -72,7 +89,7 @@ def save_pgf_figure_as_tex(
         }}%
     }}%
 \\end{{minipage}}
-\\caption*{{{caption}}}
+\\caption{{{caption}}}
 \\label{{{label}}}
 \\end{{figure}}
 """
@@ -102,7 +119,7 @@ def save_png_figure_as_tex(
         }}%
     }}%
 \\end{{minipage}}
-\\caption*{{{caption}}}
+\\caption{{{caption}}}
 \\label{{{label}}}
 \\end{{figure}}
 """

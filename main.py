@@ -4,7 +4,8 @@ from typing import Dict, List
 
 from preprocessing.model import preprocess_model_results
 from visualization.plots import plot_transition_frequency_comparison_boxplot, \
-    plot_state_machine_frequency_comparison_boxplot, plot_throughput_reports, plot_frequency_results_table
+    plot_state_machine_frequency_comparison_boxplot, plot_throughput_reports, plot_frequency_results_table, \
+    plot_throughput_information_table
 
 
 def import_data(target: str) -> Dict:
@@ -62,16 +63,18 @@ def analyze_counting_logging_distribution(model_data, target_model_name: str):
         categories,
         model_data,
         target_model_name,
+        "Measurement Type",
         log_scale=True,
-        legend_title="Measurement Type", file_name="counting_logging_transition_frequency_comparison"
+        file_name="counting_logging_transition_frequency_comparison"
     )
 
     plot_state_machine_frequency_comparison_boxplot(
         categories,
         model_data,
         target_model_name,
+        "Measurement Type",
         log_scale=True,
-        legend_title="Measurement Type", file_name="counting_state_machine_transition_frequency_comparison"
+        file_name="counting_state_machine_transition_frequency_comparison"
     )
 
 
@@ -82,22 +85,9 @@ def analyze_elevator_models():
     target_columns = model_data["message_frequency"]["global"]["targets"]["counting"]
     frequency_data = model_data["message_frequency"]["global"]["table"][target_columns]
 
+    plot_throughput_information_table(model_data, "Elevator")
+
     plot_frequency_results_table(frequency_data, model_data, "Elevator")
-
-    categories = {
-        "A": frequency_data,
-        "B": frequency_data,
-        "C": frequency_data,
-        "D": frequency_data
-    }
-
-    plot_transition_frequency_comparison_boxplot(
-        categories, model_data, "Elevator", file_name="counting_transition_frequency_comparison"
-    )
-
-    plot_state_machine_frequency_comparison_boxplot(
-        categories, model_data, "Elevator", file_name="counting_state_machine_frequency_comparison"
-    )
 
     analyze_counting_logging_distribution(model_data, "Elevator")
 
@@ -111,22 +101,9 @@ def analyze_synthetic_test_tokens_models():
     target_columns = model_data["message_frequency"]["global"]["targets"]["counting"]
     frequency_data = model_data["message_frequency"]["global"]["table"][target_columns]
 
+    plot_throughput_information_table(model_data, "SyntheticTestTokens")
+
     plot_frequency_results_table(frequency_data, model_data, "SyntheticTestTokens")
-
-    categories = {
-        "A": frequency_data,
-        "B": frequency_data,
-        "C": frequency_data,
-        "D": frequency_data
-    }
-
-    plot_transition_frequency_comparison_boxplot(
-        categories, model_data, "SyntheticTestTokens", file_name="counting_transition_frequency_comparison"
-    )
-
-    plot_state_machine_frequency_comparison_boxplot(
-        categories, model_data, "SyntheticTestTokens", file_name="counting_state_machine_frequency_comparison"
-    )
 
     analyze_counting_logging_distribution(model_data, "SyntheticTestTokens")
 

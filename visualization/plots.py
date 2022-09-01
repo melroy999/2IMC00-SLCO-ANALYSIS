@@ -1,4 +1,4 @@
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Optional
 
 import numpy as np
 import pandas as pd
@@ -137,17 +137,24 @@ def plot_transition_frequency_boxplot(
         left_margin_function=set_numeric_margins,
         right_margin_function=set_percentage_margins
     )
-    root_fig.suptitle(f"Successful Transition Executions ({target_model})", y=1.00)
+
+    n = len(frequency_data.columns)
+    root_fig.suptitle(f"Successful Transition Executions ({target_model}, n={n}, t=30)", y=1.00)
 
     plt.tight_layout(pad=0.5, w_pad=1.0, h_pad=1.0)
 
     if file_name is not None:
+        caption = \
+            "A bar plot that reports the number of successful executions and the percentage of successful " \
+            f"executions for each decision node and transition in the target model \\texttt{{{target_model}}}. " \
+            f"{get_sample_statement(n)}"
+
         target_pgf_figure = save_plot_as_pgf(target_model, file_name)
         save_plot_as_png(target_model, file_name)
         save_pgf_figure_as_tex(
             target_model,
             target_pgf_figure,
-            "Caption",
+            caption,
             f"figure:{file_name}_{target_model.lower()}",
             f"{file_name}"
         )
@@ -161,10 +168,10 @@ def plot_transition_frequency_comparison_boxplot(
         frequency_data: Dict[str, pd.DataFrame],
         model_data: Dict,
         target_model: str,
+        legend_title: str,
         file_name: str = None,
         y_scale: int = 10,
         log_scale: bool = False,
-        legend_title: str = "Configuration",
 
 ):
     """Plot the transition frequencies recorded in the given models."""
@@ -186,7 +193,9 @@ def plot_transition_frequency_comparison_boxplot(
         left_margin_function=set_logarithmic_margins if log_scale else set_numeric_margins,
         right_margin_function=set_percentage_margins
     )
-    root_fig.suptitle(f"Successful Transition Executions ({target_model})", y=1.00)
+
+    n = min(len(df.columns) for df in frequency_data.values())
+    root_fig.suptitle(f"Successful Transition Executions ({target_model}, n={n}, t=30)", y=1.00)
 
     # Put the legend outside of the plot.
     plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., title=legend_title)
@@ -194,12 +203,21 @@ def plot_transition_frequency_comparison_boxplot(
     plt.tight_layout(pad=0.5, w_pad=1.0, h_pad=1.0)
 
     if file_name is not None:
+        log_scale_comment = ""
+        if log_scale:
+            log_scale_comment = "Observe that the success count is depicted in a " \
+                                "logarithmic scale, due to the wide range of measured values. "
+        caption = \
+            "A bar plot that reports the number of successful executions and the percentage of successful " \
+            f"executions for each decision node and transition in the target model \\texttt{{{target_model}}}, where " \
+            f"the results are grouped by {legend_title.lower()}. {log_scale_comment}{get_sample_statement(n)}"
+
         target_pgf_figure = save_plot_as_pgf(target_model, file_name)
         save_plot_as_png(target_model, file_name)
         save_pgf_figure_as_tex(
             target_model,
             target_pgf_figure,
-            "Caption",
+            caption,
             f"figure:{file_name}_{target_model.lower()}",
             f"{file_name}"
         )
@@ -232,12 +250,12 @@ def plot_state_machine_frequency_boxplot(
     """Plot the state machine frequencies recorded in the model."""
     # Plot the number of transitions and the successful transitions side by side in a boxplot grouped by state machine.
     sm_frequency_data = extract_state_machine_level_data(frequency_data)
-    frequency_data, success_frequency_data = extract_frequency_data(sm_frequency_data, model_data)
+    total_frequency_data, success_frequency_data = extract_frequency_data(sm_frequency_data, model_data)
 
     # Create two sub-figures.
     root_fig = plt.figure(figsize=(plot_width, 3), dpi=300)
     plot_two_column_barplot(
-        frequency_data, success_frequency_data, root_fig,
+        total_frequency_data, success_frequency_data, root_fig,
         title_left="Total Count",
         title_right="Success Count",
         y_label="State Machine",
@@ -246,17 +264,23 @@ def plot_state_machine_frequency_boxplot(
         left_margin_function=set_numeric_margins,
         right_margin_function=set_numeric_margins
     )
-    root_fig.suptitle(f"Transition Executions ({target_model})", y=1.00)
+
+    n = len(frequency_data.columns)
+    root_fig.suptitle(f"Transition Executions ({target_model}, n={n}, t=30)", y=1.00)
 
     plt.tight_layout(pad=0.5, w_pad=1.0, h_pad=1.0)
 
     if file_name is not None:
+        caption = \
+            "A bar plot that reports the number of total and successful transition executions for each state " \
+            f"machine in the target model \\texttt{{{target_model}}}. {get_sample_statement(n)}"
+
         target_pgf_figure = save_plot_as_pgf(target_model, file_name)
         save_plot_as_png(target_model, file_name)
         save_pgf_figure_as_tex(
             target_model,
             target_pgf_figure,
-            "Caption",
+            caption,
             f"figure:{file_name}_{target_model.lower()}",
             f"{file_name}"
         )
@@ -270,22 +294,22 @@ def plot_state_machine_frequency_comparison_boxplot(
         frequency_data: Dict[str, pd.DataFrame],
         model_data: Dict,
         target_model: str,
+        legend_title: str,
         file_name: str = None,
         y_scale: int = 4,
-        log_scale: bool = False,
-        legend_title: str = "Configuration"
+        log_scale: bool = False
 ):
     """Plot the state machine frequencies recorded in the given models."""
     # Plot the number of transitions and the successful transitions side by side in a boxplot grouped by state machine.
     sm_frequency_data = {i: extract_state_machine_level_data(v) for i, v in frequency_data.items()}
     target_data_entries = [extract_frequency_data(v, model_data, i) for i, v in sm_frequency_data.items()]
-    frequency_data = pd.concat([v[0] for v in target_data_entries])
+    total_frequency_data = pd.concat([v[0] for v in target_data_entries])
     success_frequency_data = pd.concat([v[1] for v in target_data_entries])
 
     # Create two sub-figures.
     root_fig = plt.figure(figsize=(plot_width, y_scale), dpi=300)
     plot_two_column_barplot(
-        frequency_data, success_frequency_data, root_fig,
+        total_frequency_data, success_frequency_data, root_fig,
         title_left="Total Count",
         title_right="Success Count",
         y_label="State Machine",
@@ -295,7 +319,9 @@ def plot_state_machine_frequency_comparison_boxplot(
         left_margin_function=set_logarithmic_margins if log_scale else set_numeric_margins,
         right_margin_function=set_logarithmic_margins if log_scale else set_numeric_margins,
     )
-    root_fig.suptitle(f"Transition Executions ({target_model})", y=1.00)
+
+    n = min(len(df.columns) for df in frequency_data.values())
+    root_fig.suptitle(f"Transition Executions ({target_model}, n={n}, t=30)", y=1.00)
 
     # Put the legend outside of the plot.
     plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., title=legend_title)
@@ -303,12 +329,21 @@ def plot_state_machine_frequency_comparison_boxplot(
     plt.tight_layout(pad=0.5, w_pad=1.0, h_pad=1.0)
 
     if file_name is not None:
+        log_scale_comment = ""
+        if log_scale:
+            log_scale_comment = "Observe that the total count and success count are depicted in a " \
+                                "logarithmic scale, due to the wide range of measured values. "
+        caption = \
+            "A bar plot that reports the number of total and successful transition executions for each state " \
+            f"machine in the target model \\texttt{{{target_model}}}, where the results are grouped by " \
+            f"{legend_title.lower()}. {log_scale_comment}{get_sample_statement(n)}"
+
         target_pgf_figure = save_plot_as_pgf(target_model, file_name)
         save_plot_as_png(target_model, file_name)
         save_pgf_figure_as_tex(
             target_model,
             target_pgf_figure,
-            "Caption",
+            caption,
             f"figure:{file_name}_{target_model.lower()}",
             f"{file_name}"
         )
@@ -332,10 +367,10 @@ def plot_throughput_sum(
     plot_pcolormesh(
         plot_data,
         root_fig,
-        title=f"Logging Throughput Sum ({target_model}, Run {run_id})",
+        title=f"Logging Throughput Sum ({target_model}, Run {run_id}, t=30)",
         x_label="Timestamp (ms)",
         y_label="File Number",
-        c_bar_label="Frequency",
+        c_bar_label="Message Count",
         data_dimensions=dimensions,
         input_pcolormesh_options={
             "vmax": max_value
@@ -348,7 +383,9 @@ def plot_throughput_sum(
         save_png_figure_as_tex(
             target_model,
             target_png_figure,
-            "Caption",
+            f"A heatmap plot that reports on the total number of log messages per time unit (milliseconds) for each "
+            f"log file generated during run {run_id} of target model \\texttt{{{target_model}}}. Each file has a "
+            f"maximum size of 100MB. {get_sample_statement(None)}",
             f"figure:{file_name}_{target_model.lower()}_{run_id}",
             f"{file_name}_{run_id}"
         )
@@ -372,7 +409,7 @@ def plot_throughput_difference(
     plot_pcolormesh(
         plot_data,
         root_fig,
-        title=f"Logging Throughput Difference ({target_model}, Run {run_id})",
+        title=f"Logging Throughput Difference ({target_model}, Run {run_id}, t=30)",
         x_label="Timestamp (ms)",
         y_label="File Number",
         c_bar_label="Sum Difference To Row Minimum",
@@ -388,7 +425,11 @@ def plot_throughput_difference(
         save_png_figure_as_tex(
             target_model,
             target_png_figure,
-            "Caption",
+
+            f"A heatmap plot that reports on the sum difference to the row minimum of the state machines' log message "
+            f"counts per time unit (milliseconds) for each log file generated during run {run_id} of target model "
+            f"\\texttt{{{target_model}}}. Each file has a maximum size of 100MB. "
+            f"{get_sample_statement(None)}",
             f"figure:{file_name}_{target_model.lower()}_{run_id}",
             f"{file_name}_{run_id}"
         )
@@ -419,7 +460,7 @@ def plot_throughput_reports(model_data: Dict, target_model: str):
         plot_throughput_report(model_data, i, data_dimensions, max_sum, max_difference, target_model)
 
 
-def format_index(v):
+def format_frequency_table_index(v):
     """Format the given target."""
     if v.count(".") < 2:
         return f"\\\\[-8pt]\\textbf{{{v}}}"
@@ -427,7 +468,7 @@ def format_index(v):
         return f"\\hspace{{3mm}}{v}"
 
 
-def get_model_statistics_table(input_data: pd.DataFrame, model_data: Dict):
+def get_frequency_statistics_table(input_data: pd.DataFrame, model_data: Dict):
     """Get a summary table containing the statistics for the given data frame."""
     # Create a copy, such that the original remains unaltered.
     input_data = input_data.copy()
@@ -453,19 +494,22 @@ def get_model_statistics_table(input_data: pd.DataFrame, model_data: Dict):
         [frequency_statistics, success_frequency_statistics, success_ratio_statistics], axis=1, join="inner"
     )
     result_table = result_table.reindex(list(sorted(set(result_table.index), key=create_ordering_mask)))
-    result_table.index = result_table.index.map(format_index)
+    result_table.index = result_table.index.map(format_frequency_table_index)
 
     return result_table
 
 
-def reformat_tabular_header(tabular_code: str, title: str, target_header: str = "Target"):
+def reformat_tabular_header(
+        tabular_code: str, title: str, target_header: str = "Target", remove_first_spacing: bool = True
+):
     """Reformat the header of the given tabular."""
     tabular_code = tabular_code.replace("{}", target_header)
     tabular_code_lines = tabular_code.splitlines(keepends=True)
     tabular_code_lines[3] = tabular_code_lines[2]
     tabular_code_lines[2] = \
         f"\\multicolumn{{{tabular_code_lines[3].count('&') + 1}}}{{c}}{{{title}}} \\\\[2mm]\n"
-    tabular_code_lines[5] = tabular_code_lines[5][8:]
+    if remove_first_spacing:
+        tabular_code_lines[5] = tabular_code_lines[5][8:]
     return ''.join(tabular_code_lines)
 
 
@@ -478,23 +522,22 @@ def plot_frequency_results_table(
 ):
     """Plot the results rendered within the given table."""
     # Gather all the summary statistics.
-    result_table = get_model_statistics_table(input_data, model_data)
+    result_table = get_frequency_statistics_table(input_data, model_data)
 
-    # Create the table and make corrections to its formatting.
+    # Render the table and make corrections to its formatting.
     tabular_code = render_tabular(result_table)
     model_details = f"n={len(input_data.columns)}, t=30"
     if category is not None:
         model_details += f", {category}"
 
-    title = f"Performance results for target model \\texttt{{{target_model}}} $({model_details})$"
+    title = f"Performance results for target model `\\texttt{{{target_model}}}' $({model_details})$"
     tabular_code = reformat_tabular_header(tabular_code, title)
 
     # Render the table as a file with an appropriate caption and label.
     caption = \
         f"A table containing statistics on the number of executions $(e)$, number of successful executions $(se)$ " \
-        f"and success ratio $(sr)$ measured during the execution of the target model \\texttt{{{target_model}}}. The " \
-        f"results have been measured over a time span of 30 seconds, where each entry is represented by measurements " \
-        f"taken over {len(input_data.columns)} trials."
+        f"and success ratio $(sr)$ measured during the execution of the target model \\texttt{{{target_model}}}. " \
+        f"{get_sample_statement(len(input_data.columns))}"
     if caption_addendum is not None:
         caption += f" {caption_addendum}"
 
@@ -507,3 +550,94 @@ def plot_frequency_results_table(
         file_name += f"_{category.lower()}"
 
     save_table_as_tex(target_model, tabular_code, caption, label, file_name)
+
+
+def format_throughput_table_index(v):
+    """Format the given target."""
+    if v in ["total", "difference"]:
+        return f"\\\\[-8pt]\\textit{{{v}}}"
+    else:
+        return f"{v}"
+
+
+def get_throughput_frequency_statistics_table(model_data: Dict):
+    """Get a table containing statistics on the throughput characteristics of the log files."""
+    throughput_data = model_data["log_frequency"]["global"]
+    throughput_frequency_data = throughput_data["table"].copy()
+    category_mapping = dict()
+    for sm, runs in throughput_data["targets"]["thread"].items():
+        category_mapping |= {v: sm for v in runs}
+    for i, columns in throughput_data["targets"]["run"].items():
+        sum_column_value = throughput_frequency_data[f"total_frequency_{i}"] = \
+            throughput_frequency_data[columns].sum(axis=1)
+        category_mapping[f"total_frequency_{i}"] = "total"
+
+        # Create a table that holds the difference of each column to the minimum column value for each row per file.
+        # Given that the min is used, no absolute values need to be calculated.
+        # Hence, this metric is equivalent to subtracting the minimum times the number of threads from the file sum.
+        nr_of_threads = len(throughput_data["targets"]["thread"])
+        min_column_value = throughput_frequency_data[columns].min(axis=1)
+        throughput_frequency_data[f"difference_frequency_{i}"] = \
+            sum_column_value.subtract(min_column_value.multiply(nr_of_threads))
+        category_mapping[f"difference_frequency_{i}"] = "difference"
+
+    throughput_frequency_data = throughput_frequency_data.melt()
+    throughput_frequency_data["variable"] = throughput_frequency_data["variable"].map(category_mapping)
+
+    frequency_summary_statistics = throughput_frequency_data.groupby(["variable"]).agg(
+        count=("value", "count"),
+        min=("value", "min"),
+        max=("value", "max"),
+        median=("value", "median"),
+        mean=("value", "mean"),
+        std=("value", "std")
+    )
+    frequency_summary_statistics.rename(columns={
+        "count": "$N$",
+        "min": "$min(e)$",
+        "max": "$max(e)$",
+        "median": "$median(e)$",
+        "mean": "$\\mu(e)$",
+        "std": "$\\sigma(e)$"
+    }, inplace=True)
+
+    # Reorder the entries.
+    ordering = sorted(throughput_data["targets"]["thread"].keys()) + ["total", "difference"]
+    frequency_summary_statistics = frequency_summary_statistics.reindex(ordering)
+    frequency_summary_statistics.index = frequency_summary_statistics.index.map(format_throughput_table_index)
+    return frequency_summary_statistics, len(throughput_data["targets"]["run"])
+
+
+def plot_throughput_information_table(
+        model_data: Dict,
+        target_model: str
+):
+    """Plot a table that gives summary data on the throughput of the logging files."""
+    # Create a summary table.
+    result_table, n = get_throughput_frequency_statistics_table(model_data)
+
+    # Render the table and make corrections to its formatting.
+    tabular_code = render_tabular(result_table)
+    model_details = f"n={n}, t=30"
+
+    title = f"Log message throughput statistics for target model `\\texttt{{{target_model}}}' $({model_details})$"
+    tabular_code = reformat_tabular_header(tabular_code, title, remove_first_spacing=False)
+
+    # Render the table as a file with an appropriate caption and label.
+    caption = \
+        f"A table containing statistics on the log messages per milliseconds $(e)$ measured during the execution of " \
+        f"the target model \\texttt{{{target_model}}}. The total and difference entries at the end of the table " \
+        f"depict the row sum and the sum difference to the row minimum respectively. {get_sample_statement(n)}"
+
+    label = f"table:throughput_statistics_{target_model.lower()}"
+    file_name = f"throughput_statistics"
+
+    save_table_as_tex(target_model, tabular_code, caption, label, file_name, include_resize_box=False)
+
+
+def get_sample_statement(n: Optional[int]) -> str:
+    if n is None:
+        return "The results have been measured over a time span of 30 seconds."
+    else:
+        return f"The results have been measured over a time span of 30 seconds, where each entry is represented by " \
+           f"measurements taken over {n} trials."
