@@ -514,19 +514,23 @@ def reformat_tabular_header(
 
 
 def plot_frequency_results_table(
-        input_data: pd.DataFrame,
         model_data: Dict,
         target_model: str,
+        target_type: str = "counting",
         category: str = None,
         caption_addendum: str = None
 ):
     """Plot the results rendered within the given table."""
+    # Select the target table.
+    target_columns = model_data["message_frequency"]["global"]["targets"][target_type]
+    frequency_data = model_data["message_frequency"]["global"]["table"][target_columns]
+
     # Gather all the summary statistics.
-    result_table = get_frequency_statistics_table(input_data, model_data)
+    result_table = get_frequency_statistics_table(frequency_data, model_data)
 
     # Render the table and make corrections to its formatting.
     tabular_code = render_tabular(result_table)
-    model_details = f"n={len(input_data.columns)}, t=30"
+    model_details = f"n={len(frequency_data.columns)}, t=30"
     if category is not None:
         model_details += f", {category}"
 
@@ -536,10 +540,10 @@ def plot_frequency_results_table(
     # Render the table as a file with an appropriate caption and label.
     caption = \
         f"A table containing statistics on the number of executions $(e)$, number of successful executions $(se)$ " \
-        f"and success ratio $(sr)$ measured during the execution of the target model \\texttt{{{target_model}}}. " \
-        f"{get_sample_statement(len(input_data.columns))}"
+        f"and success ratio $(sr)$ measured during the execution of the target model \\texttt{{{target_model}}}. "
     if caption_addendum is not None:
-        caption += f" {caption_addendum}"
+        caption += f"{caption_addendum} "
+    caption += f"{get_sample_statement(len(frequency_data.columns))}"
 
     label = f"table:frequency_results_{target_model.lower()}"
     if category is not None:
