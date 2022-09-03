@@ -18,7 +18,7 @@ def get_thread_to_state_machine_table(model_data: Dict, message_results: List[Di
     # Use the abbreviation codes in the message data to find which thread is associated to each state machine.
     thread_to_state_machine = dict()
     for message_data in message_results:
-        for message in message_data["global_data"]["event_count"]:
+        for message in message_data:
             # Split the message and find the state machine associated to the given abbreviation.
             thread_name, abbreviation, _ = message.split(".")
             state_machine_name = abbreviation_to_state_machine[abbreviation]
@@ -56,7 +56,7 @@ def restructure_model_data(logging_results: List[Dict], target_model: str) -> Di
 
     # Find which thread is associated to which state machine.
     thread_to_state_machine = get_thread_to_state_machine_table(
-        model_data, [v["message_data"] for v in logging_results]
+        model_data, [v["event_count"] for v in logging_results]
     )
 
     # Return a revised structuring for the model information.

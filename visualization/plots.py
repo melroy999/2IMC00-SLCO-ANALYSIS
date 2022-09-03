@@ -362,7 +362,7 @@ def plot_throughput_sum(
         file_name: str = None
 ):
     """Plot a color mesh depicting the per file global throughput data for the given model run."""
-    root_fig = plt.figure(figsize=(10, 3.5), dpi=300)
+    root_fig = plt.figure(figsize=(10, 2.5), dpi=300)
     plot_data = model_data["log_frequency"]["files"]["sum"][run_id].transpose()
     plot_pcolormesh(
         plot_data,
@@ -404,7 +404,7 @@ def plot_throughput_difference(
         file_name: str = None
 ):
     """Plot a color mesh depicting the sum difference to the row minimum throughput for the given model run."""
-    root_fig = plt.figure(figsize=(10, 3.5), dpi=300)
+    root_fig = plt.figure(figsize=(10, 2.5), dpi=300)
     plot_data = model_data["log_frequency"]["files"]["difference"][run_id].transpose()
     plot_pcolormesh(
         plot_data,

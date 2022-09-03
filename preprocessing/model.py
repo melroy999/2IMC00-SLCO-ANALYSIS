@@ -10,15 +10,13 @@ from preprocessing.restructuring import restructure_model_data
 def preprocess_model_information(model_results: Dict, target_model: str) -> Dict:
     """Get the model that is tested and verify if all results are of the same model."""
     aggregate_results = [v for v in model_results["logging"] + model_results["counting"]]
-    if len(model_results["logging"]) == 0:
-        raise Exception("The required logging-based model data is unavailable.")
 
     # Verify that all of the results have the same model as a source.
     if not all(v["model"] == aggregate_results[0]["model"] for v in aggregate_results[1:]):
         raise Exception("The source model is not the same for all grouped results.")
 
     # Restructure the model information and return the result.
-    return restructure_model_data(model_results["logging"], target_model)
+    return restructure_model_data(model_results["counting"], target_model)
 
 
 def preprocess_log_frequency_table(

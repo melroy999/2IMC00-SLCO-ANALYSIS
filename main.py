@@ -1,6 +1,9 @@
 import json
+from heapq import heappush, heappushpop
 from os import path, listdir
-from typing import Dict, List
+from typing import Dict, List, Set, Tuple
+
+import sympy as sympy
 
 from preprocessing.model import preprocess_model_results
 from visualization.plots import plot_transition_frequency_comparison_boxplot, \
@@ -40,8 +43,13 @@ def import_model_results(target_model: str, include_logging: bool = False) -> Di
     model_path = path.join("results", target_model)
     model_results = {
         "counting": import_counting_results(model_path),
-        "logging": import_logging_results(model_path)
+        "logging": []
     }
+
+    if include_logging:
+        model_results |= {
+            "logging": import_logging_results(model_path)
+        }
 
     # Preprocess the results.
     return preprocess_model_results(model_results, target_model, include_logging)
@@ -166,23 +174,33 @@ def analyze_locking_mechanism_performance(
     )
 
 
-def run_test_suite(model_name: str, include_logging=False):
+def run_default_test_suite(
+        model_name: str,
+        include_logging: bool = False,
+        analyze_deterministic_structures: bool = True,
+        analyze_locking_mechanism: bool = True
+):
     """Run the default test suite for the model with the given name."""
-    default_model_data = import_model_results(f"{model_name}[T=60s]", include_logging=include_logging)
+    default_model_data = import_model_results(f"{model_name}[T=30s]", include_logging=include_logging)
 
-    # TODO: link to the right models.
     # Create a master table of all desired options.
     model_entries = {
-        "Default": default_model_data,
-        "Element": default_model_data,
-        "Variable": default_model_data,
-        "Statement": default_model_data,
-        "No Locks": default_model_data,
-        "Random + Det": default_model_data,
-        "Sequential + Det": default_model_data,
-        "Random": default_model_data,
-        "Sequential": default_model_data,
+        "Default": default_model_data
     }
+    if analyze_locking_mechanism:
+        model_entries |= {
+            "Element": default_model_data,
+            "Variable": import_model_results(f"{model_name}[LA,T=30s]"),
+            "Statement": import_model_results(f"{model_name}[SLL,T=30s]"),
+            "No Locks": import_model_results(f"{model_name}[NL,T=30s]"),
+        }
+    if analyze_deterministic_structures:
+        model_entries |= {
+            "Random + Det": import_model_results(f"{model_name}[T=30s,URP]"),
+            "Sequential + Det": default_model_data,
+            "Random": import_model_results(f"{model_name}[NDS,T=30s,URP]"),
+            "Sequential": import_model_results(f"{model_name}[NDS,T=30s]"),
+        }
 
     # Plot all the frequency tables.
     # "Element" and "Sequential + Det" are default options, and as such, do not require an additional table.
@@ -194,40 +212,42 @@ def run_test_suite(model_name: str, include_logging=False):
     )
 
     # Plot the tables for the locking mechanism.
-    for category in ["Variable", "Statement", "No Locks"]:
-        plot_frequency_results_table(
-            model_entries[category],
-            model_name,
-            category=category,
-            caption_addendum=f"The Java code has been generated with the `{category}' locking mode enabled."
+    if analyze_locking_mechanism:
+        for category in ["Variable", "Statement", "No Locks"]:
+            plot_frequency_results_table(
+                model_entries[category],
+                model_name,
+                category=category,
+                caption_addendum=f"The Java code has been generated with the `{category}' locking mode enabled."
+            )
+
+        # Create plots that compare the different locking mechanism configurations.
+        analyze_locking_mechanism_performance(
+            model_entries["Element"],
+            model_entries["Variable"],
+            model_entries["Statement"],
+            model_entries["No Locks"],
+            model_name
         )
 
     # Plot the tables for the decision structures.
-    for category in ["Random + Det", "Random", "Sequential"]:
-        plot_frequency_results_table(
-            model_entries[category],
-            model_name,
-            category=category,
-            caption_addendum=f"The Java code has been generated with the `{category}' decision mode enabled."
+    if analyze_deterministic_structures:
+        for category in ["Random + Det", "Random", "Sequential"]:
+            plot_frequency_results_table(
+                model_entries[category],
+                model_name,
+                category=category,
+                caption_addendum=f"The Java code has been generated with the `{category}' decision mode enabled."
+            )
+
+        # Create plots that compare the different decision structure configurations.
+        analyze_decision_structure_performance(
+            model_entries["Random + Det"],
+            model_entries["Sequential + Det"],
+            model_entries["Random"],
+            model_entries["Sequential"],
+            model_name
         )
-
-    # Create plots that compare the different locking mechanism configurations.
-    analyze_locking_mechanism_performance(
-        model_entries["Element"],
-        model_entries["Variable"],
-        model_entries["Statement"],
-        model_entries["No Locks"],
-        model_name
-    )
-
-    # Create plots that compare the different decision structure configurations.
-    analyze_decision_structure_performance(
-        model_entries["Random + Det"],
-        model_entries["Sequential + Det"],
-        model_entries["Random"],
-        model_entries["Sequential"],
-        model_name
-    )
 
     if include_logging:
         # Plot a default logging frequency table.
@@ -250,16 +270,70 @@ def run_test_suite(model_name: str, include_logging=False):
         plot_throughput_reports(model_entries["Default"], model_name)
 
 
+def analyze_counter_distributor_models():
+    """Analyze the counter distributor model instances."""
+    run_default_test_suite("CounterDistributor", include_logging=True)
+
+
 def analyze_elevator_models():
     """Analyze the elevator model instances."""
-    run_test_suite("Elevator", include_logging=True)
+    run_default_test_suite("Elevator", include_logging=True)
 
 
-def analyze_synthetic_test_tokens_models():
-    """Analyze the elevator model instances."""
-    run_test_suite("SyntheticTestTokens", include_logging=True)
+def analyze_telephony_models():
+    """Analyze the telephony model instances."""
+    run_default_test_suite("Telephony", include_logging=True)
+
+
+def analyze_toads_and_frogs_models():
+    """Analyze the telephony model instances."""
+    run_default_test_suite("ToadsAndFrogs", include_logging=True)
+
+
+def analyze_tokens_models():
+    """Analyze the tokens model instances."""
+    run_default_test_suite("Tokens", include_logging=True)
+
+
+# def full_period_generator(_z_prev: int, _a: int, _c: int, _m: int) -> Tuple[bool, List[int]]:
+#     _sequence: List[int] = []
+#     _visited: Set[int] = set()
+#     for i in range(_m):
+#         z = (_a * _z_prev + _c) % _m
+#         _sequence.append(_z_prev)
+#         _visited.add(_z_prev)
+#         _z_prev = z
+#         if _z_prev in _visited:
+#             if len(_sequence) != _m - 1 or _z_prev != _sequence[0]:
+#                 return False, _sequence
+#             else:
+#                 return True, _sequence
 
 
 if __name__ == "__main__":
+    analyze_counter_distributor_models()
     analyze_elevator_models()
-    analyze_synthetic_test_tokens_models()
+    analyze_telephony_models()
+    analyze_toads_and_frogs_models()
+    analyze_tokens_models()
+
+    # prime_numbers = list(sympy.sieve.primerange(1, 1000))
+    # j = 0
+    # results = []
+    # for a in [1] + prime_numbers:
+    #     for c in prime_numbers:
+    #         for m in [sympy.nextprime(1000)]:
+    #             result, sequence = full_period_generator(1, a, c, m)
+    #             if result:
+    #                 j += 1
+    #                 # print(1, a, c, m, rating, sequence)
+    #                 modulo_sequence = [v % 10 for v in sequence]
+    #                 results.append((1, a, c, m, modulo_sequence))
+    #
+    # print(results[5665])
+    # print(results[2008])
+    # print(results[6890])
+    #
+    # print(full_period_generator(1, 641, 719, 1009))
+    # print(full_period_generator(42, 193, 953, 1009))
+    # print(full_period_generator(308, 811, 31, 1009))
