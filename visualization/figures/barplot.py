@@ -3,7 +3,7 @@ import pandas
 
 from matplotlib import pyplot as plt
 import seaborn as sns
-from matplotlib.ticker import MaxNLocator, ScalarFormatter, PercentFormatter, LogLocator
+from matplotlib.ticker import MaxNLocator, ScalarFormatter, PercentFormatter, LogLocator, SymmetricalLogLocator
 
 
 # https://stackoverflow.com/a/54654448
@@ -57,15 +57,9 @@ def get_default_message_ordering(message_table):
     return list(sorted(set(message_table), key=create_ordering_mask))
 
 
-def set_numeric_margins(ax, values):
+def set_numeric_margins(ax, _):
     """Set the default margins for a numeric value type."""
     ax.xaxis.set_major_locator(MaxNLocator(nbins=5, min_n_ticks=6))
-    x_ticks = ax.get_xticks()
-    x_min = x_ticks[0]
-    x_max = x_ticks[-1]
-    if values.min() < x_min or values.max() > x_max:
-        raise Exception("Bounds do not conform the the data.")
-    ax.set_xlim([x_min, x_max])
 
 
 def set_percentage_margins(ax, _):
@@ -77,8 +71,25 @@ def set_percentage_margins(ax, _):
 
 def set_logarithmic_margins(ax, _):
     """Set the default margins for a logarithmic scale."""
-    ax.set_xscale("log")
-    ax.xaxis.set_major_locator(LogLocator())
+    # ax.set_xscale("log")
+    # loc_major = LogLocator()
+    # ax.xaxis.set_major_locator(loc_major)
+
+    ax.set_xscale("symlog")
+    loc_major = SymmetricalLogLocator(linthresh=1.0e1, base=10)
+    loc_major.set_params(numticks=5)
+    ax.xaxis.set_major_locator(loc_major)
+
+    # Adjust sub-grids based on the distance between values.
+    # x_ticks = ax.get_xticks()
+    # if x_ticks[1] / x_ticks[0] > 10:
+    #     loc_min = LogLocator(base=10, subs=(0.4, 1, 4))
+    # else:
+    #     loc_min = LogLocator(base=10, subs=(0.2, 0.4, 0.6, 0.8, 1))
+    #
+    # ax.xaxis.set_minor_locator(loc_min)
+    # ax.xaxis.set_minor_formatter(NullFormatter())
+    # ax.grid(which="minor", axis="x", linestyle=":")
 
 
 def highlight_decision_node(ax):
@@ -121,6 +132,7 @@ def plot_two_column_barplot(
         }
         if input_boxplot_options_left is not None:
             boxplot_options_left |= input_boxplot_options_left
+
         boxplot_options_right = {
             "order": ordering,
             "linewidth": 0,
@@ -149,8 +161,7 @@ def plot_two_column_barplot(
         if ticks_highlighting_function is not None:
             ticks_highlighting_function(ax_left)
 
-        # De-spine and add shaded guidelines.
-        sns.despine(parent_fig, left=True, bottom=True, trim=True)
+        # Add shaded guidelines.
         GridShader(ax_left, facecolor="lightgrey", alpha=0.7)
         GridShader(ax_right, facecolor="lightgrey", alpha=0.7)
 
@@ -161,6 +172,3 @@ def plot_two_column_barplot(
         ax_right.set_title(title_right)
         ax_right.set_xlabel(x_label_right)
         ax_right.set_ylabel("")
-        # ax_left_x_fmt = ScalarFormatterForceFormat()
-        # ax_left_x_fmt.set_powerlimits((0, 0))
-        # ax_left.xaxis.set_major_formatter(ax_left_x_fmt)

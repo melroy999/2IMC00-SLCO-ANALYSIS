@@ -1,9 +1,6 @@
 import json
-from heapq import heappush, heappushpop
 from os import path, listdir
-from typing import Dict, List, Set, Tuple
-
-import sympy as sympy
+from typing import Dict, List
 
 from preprocessing.model import preprocess_model_results
 from visualization.plots import plot_transition_frequency_comparison_boxplot, \
@@ -55,7 +52,12 @@ def import_model_results(target_model: str, include_logging: bool = False) -> Di
     return preprocess_model_results(model_results, target_model, include_logging)
 
 
-def analyze_counting_logging_distribution(model_data, target_model_name: str):
+def analyze_counting_logging_distribution(
+        model_data,
+        target_model_name: str,
+        category: str = None,
+        caption_addendum: str = None
+):
     """Analyze the transition distributions of the counting and logging measurements of a model."""
     counting_columns = model_data["message_frequency"]["global"]["targets"]["counting"]
     logging_columns = model_data["message_frequency"]["global"]["targets"]["logging"]
@@ -72,8 +74,9 @@ def analyze_counting_logging_distribution(model_data, target_model_name: str):
         model_data,
         target_model_name,
         "Measurement Type",
-        log_scale=True,
-        file_name="counting_logging_transition_frequency_comparison"
+        file_name="counting_logging_transition_frequency_comparison",
+        category=category,
+        caption_addendum=caption_addendum
     )
 
     plot_state_machine_frequency_comparison_boxplot(
@@ -81,8 +84,9 @@ def analyze_counting_logging_distribution(model_data, target_model_name: str):
         model_data,
         target_model_name,
         "Measurement Type",
-        log_scale=True,
-        file_name="counting_state_machine_transition_frequency_comparison"
+        file_name="counting_logging_state_machine_transition_frequency_comparison",
+        category=category,
+        caption_addendum=caption_addendum
     )
 
 
@@ -117,7 +121,6 @@ def analyze_decision_structure_performance(
         random_pick_model_data,
         target_model_name,
         "Decision Mode",
-        log_scale=True,
         file_name="decision_mode_transition_frequency_comparison"
     )
 
@@ -126,7 +129,6 @@ def analyze_decision_structure_performance(
         random_pick_model_data,
         target_model_name,
         "Decision Mode",
-        log_scale=True,
         file_name="decision_mode_state_machine_transition_frequency_comparison"
     )
 
@@ -160,7 +162,6 @@ def analyze_locking_mechanism_performance(
         element_model_data,
         target_model_name,
         "Locking Mode",
-        log_scale=True,
         file_name="locking_mode_transition_frequency_comparison"
     )
 
@@ -169,16 +170,20 @@ def analyze_locking_mechanism_performance(
         element_model_data,
         target_model_name,
         "Locking Mode",
-        log_scale=True,
         file_name="locking_mode_state_machine_transition_frequency_comparison"
     )
+
+
+def get_target_file(model_name: str, configuration: List[str]) -> str:
+    """Get the file associated with the given options."""
+    return f"{model_name}[{','.join(sorted(v for v in configuration if v != ''))}]"
 
 
 def run_default_test_suite(
         model_name: str,
         include_logging: bool = False,
         analyze_deterministic_structures: bool = True,
-        analyze_locking_mechanism: bool = True
+        analyze_locking_mechanism: bool = True,
 ):
     """Run the default test suite for the model with the given name."""
     default_model_data = import_model_results(f"{model_name}[T=30s]", include_logging=include_logging)
@@ -190,16 +195,16 @@ def run_default_test_suite(
     if analyze_locking_mechanism:
         model_entries |= {
             "Element": default_model_data,
-            "Variable": import_model_results(f"{model_name}[LA,T=30s]"),
-            "Statement": import_model_results(f"{model_name}[SLL,T=30s]"),
-            "No Locks": import_model_results(f"{model_name}[NL,T=30s]"),
+            "Variable": import_model_results(get_target_file(model_name, ["LA", "T=30s"])),
+            "Statement": import_model_results(get_target_file(model_name, ["SLL", "T=30s"])),
+            "No Locks": import_model_results(get_target_file(model_name, ["NL", "T=30s"])),
         }
     if analyze_deterministic_structures:
         model_entries |= {
-            "Random + Det": import_model_results(f"{model_name}[T=30s,URP]"),
+            "Random + Det": import_model_results(get_target_file(model_name, ["URP", "T=30s"])),
             "Sequential + Det": default_model_data,
-            "Random": import_model_results(f"{model_name}[NDS,T=30s,URP]"),
-            "Sequential": import_model_results(f"{model_name}[NDS,T=30s]"),
+            "Random": import_model_results(get_target_file(model_name, ["NDS", "URP", "T=30s"])),
+            "Sequential": import_model_results(get_target_file(model_name, ["NDS", "T=30s"])),
         }
 
     # Plot all the frequency tables.
@@ -289,25 +294,17 @@ def analyze_toads_and_frogs_models():
     """Analyze the telephony model instances."""
     run_default_test_suite("ToadsAndFrogs", include_logging=True)
 
+    # Plot comparisons between counting and logging data.
+    target_model = import_model_results(get_target_file("ToadsAndFrogs", ["URP", "T=30s"]), include_logging=True)
+    analyze_counting_logging_distribution(
+        target_model, "ToadsAndFrogs", category="Random",
+        caption_addendum=f"The Java code has been generated with the `Random' decision mode enabled."
+    )
+
 
 def analyze_tokens_models():
     """Analyze the tokens model instances."""
     run_default_test_suite("Tokens", include_logging=True)
-
-
-# def full_period_generator(_z_prev: int, _a: int, _c: int, _m: int) -> Tuple[bool, List[int]]:
-#     _sequence: List[int] = []
-#     _visited: Set[int] = set()
-#     for i in range(_m):
-#         z = (_a * _z_prev + _c) % _m
-#         _sequence.append(_z_prev)
-#         _visited.add(_z_prev)
-#         _z_prev = z
-#         if _z_prev in _visited:
-#             if len(_sequence) != _m - 1 or _z_prev != _sequence[0]:
-#                 return False, _sequence
-#             else:
-#                 return True, _sequence
 
 
 if __name__ == "__main__":
@@ -316,24 +313,3 @@ if __name__ == "__main__":
     analyze_telephony_models()
     analyze_toads_and_frogs_models()
     analyze_tokens_models()
-
-    # prime_numbers = list(sympy.sieve.primerange(1, 1000))
-    # j = 0
-    # results = []
-    # for a in [1] + prime_numbers:
-    #     for c in prime_numbers:
-    #         for m in [sympy.nextprime(1000)]:
-    #             result, sequence = full_period_generator(1, a, c, m)
-    #             if result:
-    #                 j += 1
-    #                 # print(1, a, c, m, rating, sequence)
-    #                 modulo_sequence = [v % 10 for v in sequence]
-    #                 results.append((1, a, c, m, modulo_sequence))
-    #
-    # print(results[5665])
-    # print(results[2008])
-    # print(results[6890])
-    #
-    # print(full_period_generator(1, 641, 719, 1009))
-    # print(full_period_generator(42, 193, 953, 1009))
-    # print(full_period_generator(308, 811, 31, 1009))

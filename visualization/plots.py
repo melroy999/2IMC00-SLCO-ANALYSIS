@@ -115,53 +115,12 @@ def extract_success_data(frequency_data: pd.DataFrame, model_data: Dict, _type: 
     return success_frequency_data, success_ratio_data
 
 
-def plot_transition_frequency_boxplot(
-        frequency_data: pd.DataFrame,
-        model_data: Dict,
-        target_model: str,
-        file_name: str = None
-):
-    """Plot the transition frequencies recorded in the model."""
-    # Plot the number of successful transitions and the percentage of successful transitions side by side in a boxplot.
-    success_frequency_data, success_ratio_data = extract_success_data(frequency_data, model_data)
-
-    # Create two sub-figures.
-    root_fig = plt.figure(figsize=(plot_width, 6), dpi=300)
-    plot_two_column_barplot(
-        success_frequency_data, success_ratio_data, root_fig,
-        title_left="Success Count",
-        title_right="Success/Total Ratio",
-        y_label="Subject",
-        x_label_left="Count",
-        x_label_right="Percentage",
-        left_margin_function=set_numeric_margins,
-        right_margin_function=set_percentage_margins
-    )
-
-    n = len(frequency_data.columns)
-    root_fig.suptitle(f"Successful Transition Executions ({target_model}, n={n}, t=30)", y=1.00)
-
-    plt.tight_layout(pad=0.5, w_pad=1.0, h_pad=1.0)
-
-    if file_name is not None:
-        caption = \
-            "A bar plot that reports the number of successful executions and the percentage of successful " \
-            f"executions for each decision node and transition in the target model \\texttt{{{target_model}}}. " \
-            f"{get_sample_statement(n)}"
-
-        target_pgf_figure = save_plot_as_pgf(target_model, file_name)
-        save_plot_as_png(target_model, file_name)
-        save_pgf_figure_as_tex(
-            target_model,
-            target_pgf_figure,
-            caption,
-            f"figure:{file_name}_{target_model.lower()}",
-            f"{file_name}"
-        )
-    else:
-        plt.show()
-
-    plt.close("all")
+def use_log_scale(plot_data: pd.DataFrame) -> bool:
+    """Determine whether the given data should be plotted in logarithmic scale or not."""
+    mean_values = plot_data.groupby(["message", "type"]).mean()
+    min_value = mean_values["value"].min()
+    max_value = mean_values["value"].max()
+    return max_value / min_value > 10
 
 
 def plot_transition_frequency_comparison_boxplot(
@@ -171,14 +130,21 @@ def plot_transition_frequency_comparison_boxplot(
         legend_title: str,
         file_name: str = None,
         y_scale: int = 10,
-        log_scale: bool = False,
-
+        category: str = None,
+        caption_addendum: str = None
 ):
     """Plot the transition frequencies recorded in the given models."""
     # Plot the number of successful transitions and the percentage of successful transitions side by side in a boxplot.
     target_data_entries = [extract_success_data(v, model_data, i) for i, v in frequency_data.items()]
     success_frequency_data = pd.concat([v[0] for v in target_data_entries])
     success_ratio_data = pd.concat([v[1] for v in target_data_entries])
+
+    # Check if a logarithmic scale needs to be used to keep the data readable.
+    log_scale = use_log_scale(success_frequency_data)
+
+    # Add identifiers for the category.
+    fancy_category = f", {category}" if category is not None else ""
+    id_category = f"_{category.lower().replace(' ', '').replace(',', '')}" if category is not None else ""
 
     # Create two sub-figures.
     root_fig = plt.figure(figsize=(plot_width, y_scale), dpi=300)
@@ -195,7 +161,7 @@ def plot_transition_frequency_comparison_boxplot(
     )
 
     n = min(len(df.columns) for df in frequency_data.values())
-    root_fig.suptitle(f"Successful Transition Executions ({target_model}, n={n}, t=30)", y=1.00)
+    root_fig.suptitle(f"Successful Transition Executions ({target_model}{fancy_category}, n={n}, t=30)", y=1.00)
 
     # Put the legend outside of the plot.
     plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., title=legend_title)
@@ -206,20 +172,24 @@ def plot_transition_frequency_comparison_boxplot(
         log_scale_comment = ""
         if log_scale:
             log_scale_comment = "Observe that the success count is depicted in a " \
-                                "logarithmic scale, due to the wide range of measured values. "
+                                "logarithmic scale, due to the wide range of measured values: the first " \
+                                "column adheres to a linear scale; all subsequent columns are logarithmic."
         caption = \
             "A bar plot that reports the number of successful executions and the percentage of successful " \
             f"executions for each decision node and transition in the target model \\texttt{{{target_model}}}, where " \
-            f"the results are grouped by {legend_title.lower()}. {log_scale_comment}{get_sample_statement(n)}"
+            f"the results are grouped by {legend_title.lower()}. "
+        if caption_addendum is not None:
+            caption += f"{caption_addendum} "
+        caption += f"{log_scale_comment}{get_sample_statement(n)}"
 
-        target_pgf_figure = save_plot_as_pgf(target_model, file_name)
-        save_plot_as_png(target_model, file_name)
+        target_pgf_figure = save_plot_as_pgf(target_model, f"{file_name}{id_category}")
+        save_plot_as_png(target_model, f"{file_name}{id_category}")
         save_pgf_figure_as_tex(
             target_model,
             target_pgf_figure,
             caption,
-            f"figure:{file_name}_{target_model.lower()}",
-            f"{file_name}"
+            f"figure:{file_name}_{target_model.lower()}{id_category}",
+            f"{file_name}{id_category}"
         )
     else:
         plt.show()
@@ -241,55 +211,6 @@ def extract_state_machine_level_data(frequency_data):
     return state_machine_frequency_data
 
 
-def plot_state_machine_frequency_boxplot(
-        frequency_data: pd.DataFrame,
-        model_data: Dict,
-        target_model: str,
-        file_name: str = None
-):
-    """Plot the state machine frequencies recorded in the model."""
-    # Plot the number of transitions and the successful transitions side by side in a boxplot grouped by state machine.
-    sm_frequency_data = extract_state_machine_level_data(frequency_data)
-    total_frequency_data, success_frequency_data = extract_frequency_data(sm_frequency_data, model_data)
-
-    # Create two sub-figures.
-    root_fig = plt.figure(figsize=(plot_width, 3), dpi=300)
-    plot_two_column_barplot(
-        total_frequency_data, success_frequency_data, root_fig,
-        title_left="Total Count",
-        title_right="Success Count",
-        y_label="State Machine",
-        x_label_left="Count",
-        x_label_right="Count",
-        left_margin_function=set_numeric_margins,
-        right_margin_function=set_numeric_margins
-    )
-
-    n = len(frequency_data.columns)
-    root_fig.suptitle(f"Transition Executions ({target_model}, n={n}, t=30)", y=1.00)
-
-    plt.tight_layout(pad=0.5, w_pad=1.0, h_pad=1.0)
-
-    if file_name is not None:
-        caption = \
-            "A bar plot that reports the number of total and successful transition executions for each state " \
-            f"machine in the target model \\texttt{{{target_model}}}. {get_sample_statement(n)}"
-
-        target_pgf_figure = save_plot_as_pgf(target_model, file_name)
-        save_plot_as_png(target_model, file_name)
-        save_pgf_figure_as_tex(
-            target_model,
-            target_pgf_figure,
-            caption,
-            f"figure:{file_name}_{target_model.lower()}",
-            f"{file_name}"
-        )
-    else:
-        plt.show()
-
-    plt.close("all")
-
-
 def plot_state_machine_frequency_comparison_boxplot(
         frequency_data: Dict[str, pd.DataFrame],
         model_data: Dict,
@@ -297,7 +218,8 @@ def plot_state_machine_frequency_comparison_boxplot(
         legend_title: str,
         file_name: str = None,
         y_scale: int = 4,
-        log_scale: bool = False
+        category: str = None,
+        caption_addendum: str = None
 ):
     """Plot the state machine frequencies recorded in the given models."""
     # Plot the number of transitions and the successful transitions side by side in a boxplot grouped by state machine.
@@ -305,6 +227,13 @@ def plot_state_machine_frequency_comparison_boxplot(
     target_data_entries = [extract_frequency_data(v, model_data, i) for i, v in sm_frequency_data.items()]
     total_frequency_data = pd.concat([v[0] for v in target_data_entries])
     success_frequency_data = pd.concat([v[1] for v in target_data_entries])
+
+    # Check if a logarithmic scale needs to be used to keep the data readable.
+    log_scale = use_log_scale(total_frequency_data) or use_log_scale(success_frequency_data)
+
+    # Add identifiers for the category.
+    fancy_category = f", {category}" if category is not None else ""
+    id_category = f"_{category.lower().replace(' ', '').replace(',', '')}" if category is not None else ""
 
     # Create two sub-figures.
     root_fig = plt.figure(figsize=(plot_width, y_scale), dpi=300)
@@ -321,7 +250,7 @@ def plot_state_machine_frequency_comparison_boxplot(
     )
 
     n = min(len(df.columns) for df in frequency_data.values())
-    root_fig.suptitle(f"Transition Executions ({target_model}, n={n}, t=30)", y=1.00)
+    root_fig.suptitle(f"Transition Executions ({target_model}{fancy_category}, n={n}, t=30)", y=1.00)
 
     # Put the legend outside of the plot.
     plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., title=legend_title)
@@ -332,20 +261,24 @@ def plot_state_machine_frequency_comparison_boxplot(
         log_scale_comment = ""
         if log_scale:
             log_scale_comment = "Observe that the total count and success count are depicted in a " \
-                                "logarithmic scale, due to the wide range of measured values. "
+                                "linear-logarithmic scale, due to the wide range of measured values: the first " \
+                                "column adheres to a linear scale; all subsequent columns are logarithmic."
         caption = \
             "A bar plot that reports the number of total and successful transition executions for each state " \
             f"machine in the target model \\texttt{{{target_model}}}, where the results are grouped by " \
-            f"{legend_title.lower()}. {log_scale_comment}{get_sample_statement(n)}"
+            f"{legend_title.lower()}. "
+        if caption_addendum is not None:
+            caption += f"{caption_addendum} "
+        caption += f"{log_scale_comment}{get_sample_statement(n)}"
 
-        target_pgf_figure = save_plot_as_pgf(target_model, file_name)
-        save_plot_as_png(target_model, file_name)
+        target_pgf_figure = save_plot_as_pgf(target_model, f"{file_name}{id_category}")
+        save_plot_as_png(target_model, f"{file_name}{id_category}")
         save_pgf_figure_as_tex(
             target_model,
             target_pgf_figure,
             caption,
-            f"figure:{file_name}_{target_model.lower()}",
-            f"{file_name}"
+            f"figure:{file_name}_{target_model.lower()}{id_category}",
+            f"{file_name}{id_category}"
         )
     else:
         plt.show()
