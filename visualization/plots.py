@@ -120,7 +120,9 @@ def use_log_scale(plot_data: pd.DataFrame) -> bool:
     mean_values = plot_data.groupby(["message", "type"]).mean()
     min_value = mean_values["value"].min()
     max_value = mean_values["value"].max()
-    return max_value / min_value > 10
+    if min_value == 0:
+        return True
+    return max_value / min_value > 25
 
 
 def plot_transition_frequency_comparison_boxplot(
@@ -173,7 +175,7 @@ def plot_transition_frequency_comparison_boxplot(
         if log_scale:
             log_scale_comment = "Observe that the success count is depicted in a " \
                                 "logarithmic scale, due to the wide range of measured values: the first " \
-                                "column adheres to a linear scale; all subsequent columns are logarithmic."
+                                "column adheres to a linear scale; all subsequent columns are logarithmic. "
         caption = \
             "A bar plot that reports the number of successful executions and the percentage of successful " \
             f"executions for each decision node and transition in the target model \\texttt{{{target_model}}}, where " \
@@ -189,7 +191,8 @@ def plot_transition_frequency_comparison_boxplot(
             target_pgf_figure,
             caption,
             f"figure:{file_name}_{target_model.lower()}{id_category}",
-            f"{file_name}{id_category}"
+            f"{file_name}{id_category}",
+            float_modifier="h!"
         )
     else:
         plt.show()
@@ -235,6 +238,10 @@ def plot_state_machine_frequency_comparison_boxplot(
     fancy_category = f", {category}" if category is not None else ""
     id_category = f"_{category.lower().replace(' ', '').replace(',', '')}" if category is not None else ""
 
+    # How many categories are present?
+    nr_of_categories = len(set(total_frequency_data["message"]))
+    y_scale = nr_of_categories
+
     # Create two sub-figures.
     root_fig = plt.figure(figsize=(plot_width, y_scale), dpi=300)
     plot_two_column_barplot(
@@ -262,7 +269,7 @@ def plot_state_machine_frequency_comparison_boxplot(
         if log_scale:
             log_scale_comment = "Observe that the total count and success count are depicted in a " \
                                 "linear-logarithmic scale, due to the wide range of measured values: the first " \
-                                "column adheres to a linear scale; all subsequent columns are logarithmic."
+                                "column adheres to a linear scale; all subsequent columns are logarithmic. "
         caption = \
             "A bar plot that reports the number of total and successful transition executions for each state " \
             f"machine in the target model \\texttt{{{target_model}}}, where the results are grouped by " \

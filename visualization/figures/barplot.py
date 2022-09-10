@@ -60,6 +60,8 @@ def get_default_message_ordering(message_table):
 def set_numeric_margins(ax, _):
     """Set the default margins for a numeric value type."""
     ax.xaxis.set_major_locator(MaxNLocator(nbins=5, min_n_ticks=6))
+    x_ticks = ax.get_xticks()
+    ax.set_xlim([0, x_ticks[-1]])
 
 
 def set_percentage_margins(ax, _):
@@ -69,27 +71,18 @@ def set_percentage_margins(ax, _):
     ax.xaxis.set_major_formatter(PercentFormatter(1.0))
 
 
-def set_logarithmic_margins(ax, _):
+def set_logarithmic_margins(ax, values):
     """Set the default margins for a logarithmic scale."""
-    # ax.set_xscale("log")
-    # loc_major = LogLocator()
-    # ax.xaxis.set_major_locator(loc_major)
-
     ax.set_xscale("symlog")
     loc_major = SymmetricalLogLocator(linthresh=1.0e1, base=10)
     loc_major.set_params(numticks=5)
     ax.xaxis.set_major_locator(loc_major)
 
-    # Adjust sub-grids based on the distance between values.
-    # x_ticks = ax.get_xticks()
-    # if x_ticks[1] / x_ticks[0] > 10:
-    #     loc_min = LogLocator(base=10, subs=(0.4, 1, 4))
-    # else:
-    #     loc_min = LogLocator(base=10, subs=(0.2, 0.4, 0.6, 0.8, 1))
-    #
-    # ax.xaxis.set_minor_locator(loc_min)
-    # ax.xaxis.set_minor_formatter(NullFormatter())
-    # ax.grid(which="minor", axis="x", linestyle=":")
+    x_ticks = ax.get_xticks()
+    max_value = values.max()
+    if x_ticks[-1] < max_value:
+        scale_factor = x_ticks[-1] / x_ticks[-2]
+        ax.set_xlim([0, x_ticks[-1] * scale_factor])
 
 
 def highlight_decision_node(ax):

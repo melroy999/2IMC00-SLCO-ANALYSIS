@@ -95,26 +95,36 @@ def analyze_decision_structure_performance(
         sequential_structures_model_data,
         random_pick_model_data,
         sequential_model_data,
-        target_model_name: str
+        target_model_name: str,
+        include_sequential: bool = True
 ):
     """Analyze the transition distributions of the different locking modes."""
     counting_columns = random_pick_structures_model_data["message_frequency"]["global"]["targets"]["counting"]
     random_pick_structures_frequency_data = \
         random_pick_structures_model_data["message_frequency"]["global"]["table"][counting_columns]
-    counting_columns = sequential_structures_model_data["message_frequency"]["global"]["targets"]["counting"]
-    sequential_structures_frequency_data = \
-        sequential_structures_model_data["message_frequency"]["global"]["table"][counting_columns]
+
     counting_columns = random_pick_model_data["message_frequency"]["global"]["targets"]["counting"]
     random_pick_frequency_data = random_pick_model_data["message_frequency"]["global"]["table"][counting_columns]
-    counting_columns = sequential_model_data["message_frequency"]["global"]["targets"]["counting"]
-    sequential_frequency_data = sequential_model_data["message_frequency"]["global"]["table"][counting_columns]
 
-    categories = {
-        "Sequential + Det": sequential_structures_frequency_data,
-        "Random + Det": random_pick_structures_frequency_data,
-        "Sequential": sequential_frequency_data,
-        "Random": random_pick_frequency_data,
-    }
+    if include_sequential:
+        counting_columns = sequential_structures_model_data["message_frequency"]["global"]["targets"]["counting"]
+        sequential_structures_frequency_data = \
+            sequential_structures_model_data["message_frequency"]["global"]["table"][counting_columns]
+
+        counting_columns = sequential_model_data["message_frequency"]["global"]["targets"]["counting"]
+        sequential_frequency_data = sequential_model_data["message_frequency"]["global"]["table"][counting_columns]
+
+        categories = {
+            "Sequential + Det": sequential_structures_frequency_data,
+            "Random + Det": random_pick_structures_frequency_data,
+            "Sequential": sequential_frequency_data,
+            "Random": random_pick_frequency_data,
+        }
+    else:
+        categories = {
+            "Random + Det": random_pick_structures_frequency_data,
+            "Random": random_pick_frequency_data,
+        }
 
     plot_transition_frequency_comparison_boxplot(
         categories,
@@ -138,7 +148,7 @@ def analyze_locking_mechanism_performance(
         variable_model_data,
         statement_model_data,
         no_locks_model_data,
-        target_model_name: str
+        target_model_name: str,
 ):
     """Analyze the transition distributions of the different locking modes."""
     counting_columns = element_model_data["message_frequency"]["global"]["targets"]["counting"]
@@ -154,7 +164,8 @@ def analyze_locking_mechanism_performance(
         "Element": element_frequency_data,
         "Variable": variable_frequency_data,
         "Statement": statement_frequency_data,
-        "No Locks": no_locks_frequency_data,
+        # TODO: Removed, due to the results not providing worthwhile information.
+        # "No Locks": no_locks_frequency_data,
     }
 
     plot_transition_frequency_comparison_boxplot(
@@ -179,14 +190,14 @@ def get_target_file(model_name: str, configuration: List[str]) -> str:
     return f"{model_name}[{','.join(sorted(v for v in configuration if v != ''))}]"
 
 
-def run_default_test_suite(
+def run_default_analysis_suite(
         model_name: str,
         include_logging: bool = False,
         analyze_deterministic_structures: bool = True,
-        analyze_locking_mechanism: bool = True,
+        analyze_locking_mechanism: bool = True
 ):
     """Run the default test suite for the model with the given name."""
-    default_model_data = import_model_results(f"{model_name}[T=30s]", include_logging=include_logging)
+    default_model_data = import_model_results(get_target_file(model_name, ["T=30s"]), include_logging=include_logging)
 
     # Create a master table of all desired options.
     model_entries = {
@@ -275,24 +286,81 @@ def run_default_test_suite(
         plot_throughput_reports(model_entries["Default"], model_name)
 
 
+def run_telephony_analysis_suite(
+        model_name: str = "Telephony",
+        include_logging: bool = False,
+        analyze_deterministic_structures: bool = True,
+        analyze_locking_mechanism: bool = True
+):
+    """Run the default test suite for the telephony model."""
+    default_model_data = import_model_results(
+        get_target_file(model_name, ["URP", "T=30s"]), include_logging=include_logging
+    )
+
+    # Create a master table of all desired options.
+    model_entries = {
+        "Default": default_model_data
+    }
+    if analyze_locking_mechanism:
+        model_entries |= {
+            "Element": default_model_data,
+            "Variable": import_model_results(get_target_file(model_name, ["URP", "LA", "T=30s"])),
+            "Statement": import_model_results(get_target_file(model_name, ["URP", "SLL", "T=30s"])),
+            "No Locks": import_model_results(get_target_file(model_name, ["URP", "NL", "T=30s"])),
+        }
+    if analyze_deterministic_structures:
+        model_entries |= {
+            "Random + Det": default_model_data,
+            "Sequential + Det": import_model_results(get_target_file(model_name, ["T=30s"])),
+            "Random": import_model_results(get_target_file(model_name, ["NDS", "URP", "T=30s"])),
+            "Sequential": import_model_results(get_target_file(model_name, ["NDS", "T=30s"])),
+        }
+
+    # Plot the tables for the locking mechanism.
+    if analyze_locking_mechanism:
+        # Create plots that compare the different locking mechanism configurations.
+        analyze_locking_mechanism_performance(
+            model_entries["Element"],
+            model_entries["Variable"],
+            model_entries["Statement"],
+            model_entries["No Locks"],
+            model_name
+        )
+
+    # Plot the tables for the decision structures.
+    if analyze_deterministic_structures:
+        # Create plots that compare the different decision structure configurations.
+        analyze_decision_structure_performance(
+            model_entries["Random + Det"],
+            model_entries["Sequential + Det"],
+            model_entries["Random"],
+            model_entries["Sequential"],
+            model_name
+        )
+
+    if include_logging:
+        # Plot comparisons between counting and logging data.
+        analyze_counting_logging_distribution(model_entries["Default"], model_name)
+
+
 def analyze_counter_distributor_models():
     """Analyze the counter distributor model instances."""
-    run_default_test_suite("CounterDistributor", include_logging=True)
+    run_default_analysis_suite("CounterDistributor", include_logging=True)
 
 
 def analyze_elevator_models():
     """Analyze the elevator model instances."""
-    run_default_test_suite("Elevator", include_logging=True)
+    run_default_analysis_suite("Elevator", include_logging=True)
 
 
 def analyze_telephony_models():
     """Analyze the telephony model instances."""
-    run_default_test_suite("Telephony", include_logging=True)
+    run_telephony_analysis_suite("Telephony", include_logging=True)
 
 
 def analyze_toads_and_frogs_models():
     """Analyze the telephony model instances."""
-    run_default_test_suite("ToadsAndFrogs", include_logging=True)
+    run_default_analysis_suite("ToadsAndFrogs", include_logging=True)
 
     # Plot comparisons between counting and logging data.
     target_model = import_model_results(get_target_file("ToadsAndFrogs", ["URP", "T=30s"]), include_logging=True)
@@ -304,12 +372,12 @@ def analyze_toads_and_frogs_models():
 
 def analyze_tokens_models():
     """Analyze the tokens model instances."""
-    run_default_test_suite("Tokens", include_logging=True)
+    run_default_analysis_suite("Tokens", include_logging=True)
 
 
 if __name__ == "__main__":
-    analyze_counter_distributor_models()
-    analyze_elevator_models()
+    # analyze_counter_distributor_models()
+    # analyze_elevator_models()
     analyze_telephony_models()
-    analyze_toads_and_frogs_models()
-    analyze_tokens_models()
+    # analyze_toads_and_frogs_models()
+    # analyze_tokens_models()
