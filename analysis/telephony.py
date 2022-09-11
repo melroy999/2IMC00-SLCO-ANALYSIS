@@ -243,8 +243,7 @@ def run_telephony_analysis(
         run_telephony_logging_measurement_analysis(model_entries["Default"], model_name, category=base_category)
 
         # Plot a table with throughput summary data.
-        # TODO: Add base category.
-        plot_throughput_information_table(model_entries["Default"], model_name)
+        plot_throughput_information_table(model_entries["Default"], model_name, category=base_category)
 
         # Use the default model to plot log message throughput information.
-        plot_throughput_reports(model_entries["Default"], model_name)
+        plot_throughput_reports(model_entries["Default"], model_name, category=base_category)

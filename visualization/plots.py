@@ -181,7 +181,7 @@ def plot_transition_frequency_comparison_boxplot(
         caption = \
             "A bar plot that reports the number of successful executions and the percentage of successful " \
             f"executions for each decision node and transition in the target model \\texttt{{{target_model}}}, where " \
-            f"the results are grouped by {legend_title.lower()}. "
+            f"the results are grouped by the {legend_title.lower()}. "
         if caption_addendum is not None:
             caption += f"{caption_addendum} "
         caption += f"{log_scale_comment}{get_sample_statement(n)}"
@@ -242,8 +242,8 @@ def plot_state_machine_frequency_comparison_boxplot(
         if category is not None else ""
 
     # How many categories are present?
-    nr_of_categories = len(set(total_frequency_data["message"]))
-    y_scale = nr_of_categories
+    nr_of_state_machines = len(set(total_frequency_data["message"]))
+    y_scale = 1 + (nr_of_state_machines * len(frequency_data)) / 4.0
 
     # Create two sub-figures.
     root_fig = plt.figure(figsize=(plot_width, y_scale), dpi=300)
@@ -275,7 +275,7 @@ def plot_state_machine_frequency_comparison_boxplot(
                                 "column adheres to a linear scale; all subsequent columns are logarithmic. "
         caption = \
             "A bar plot that reports the number of total and successful transition executions for each state " \
-            f"machine in the target model \\texttt{{{target_model}}}, where the results are grouped by " \
+            f"machine in the target model \\texttt{{{target_model}}}, where the results are grouped by the " \
             f"{legend_title.lower()}. "
         if caption_addendum is not None:
             caption += f"{caption_addendum} "
@@ -288,7 +288,8 @@ def plot_state_machine_frequency_comparison_boxplot(
             target_pgf_figure,
             caption,
             f"figure:{file_name}_{target_model.lower()}{id_category}",
-            f"{file_name}{id_category}"
+            f"{file_name}{id_category}",
+            float_modifier="h!"
         )
     else:
         plt.show()
@@ -302,15 +303,19 @@ def plot_throughput_sum(
         dimensions: Tuple[int, int],
         max_value: int,
         target_model: str,
-        file_name: str = None
+        file_name: str = None,
+        category: str = None,
 ):
     """Plot a color mesh depicting the per file global throughput data for the given model run."""
+    category_fancy = "" if category is None else f", {category}"
+    category_id = category_fancy.lower().replace(",", "_").replace("+", "_").replace(" ", "")
+
     root_fig = plt.figure(figsize=(10, 2.5), dpi=300)
     plot_data = model_data["log_frequency"]["files"]["sum"][run_id].transpose()
     plot_pcolormesh(
         plot_data,
         root_fig,
-        title=f"Logging Throughput Sum ({target_model}, Run {run_id}, t=30)",
+        title=f"Logging Throughput Sum ({target_model}{category_fancy}, Run {run_id}, t=30)",
         x_label="Timestamp (ms)",
         y_label="File Number",
         c_bar_label="Message Count",
@@ -322,15 +327,15 @@ def plot_throughput_sum(
     plt.tight_layout(pad=0.5, w_pad=1.0, h_pad=1.0)
 
     if file_name is not None:
-        target_png_figure = save_plot_as_png(target_model, f"{file_name}_{run_id}")
+        target_png_figure = save_plot_as_png(target_model, f"{file_name}{category_id}_{run_id}")
         save_png_figure_as_tex(
             target_model,
             target_png_figure,
             f"A heatmap plot that reports on the total number of log messages per time unit (milliseconds) for each "
             f"log file generated during run {run_id} of target model \\texttt{{{target_model}}}. Each file has a "
             f"maximum size of 100MB. {get_sample_statement(None)}",
-            f"figure:{file_name}_{target_model.lower()}_{run_id}",
-            f"{file_name}_{run_id}"
+            f"figure:{file_name}{category_id}_{target_model.lower()}_{run_id}",
+            f"{file_name}{category_id}_{run_id}"
         )
     else:
         plt.show()
@@ -344,15 +349,19 @@ def plot_throughput_difference(
         dimensions: Tuple[int, int],
         max_value: int,
         target_model: str,
-        file_name: str = None
+        file_name: str = None,
+        category: str = None,
 ):
     """Plot a color mesh depicting the sum difference to the row minimum throughput for the given model run."""
+    category_fancy = "" if category is None else f", {category}"
+    category_id = category_fancy.lower().replace(",", "_").replace("+", "_").replace(" ", "")
+
     root_fig = plt.figure(figsize=(10, 2.5), dpi=300)
     plot_data = model_data["log_frequency"]["files"]["difference"][run_id].transpose()
     plot_pcolormesh(
         plot_data,
         root_fig,
-        title=f"Logging Throughput Difference ({target_model}, Run {run_id}, t=30)",
+        title=f"Logging Throughput Difference ({target_model}{category_fancy}, Run {run_id}, t=30)",
         x_label="Timestamp (ms)",
         y_label="File Number",
         c_bar_label="Sum Difference To Row Minimum",
@@ -364,7 +373,7 @@ def plot_throughput_difference(
     plt.tight_layout(pad=0.5, w_pad=1.0, h_pad=1.0)
 
     if file_name is not None:
-        target_png_figure = save_plot_as_png(target_model, f"{file_name}_{run_id}")
+        target_png_figure = save_plot_as_png(target_model, f"{file_name}{category_id}_{run_id}")
         save_png_figure_as_tex(
             target_model,
             target_png_figure,
@@ -373,8 +382,8 @@ def plot_throughput_difference(
             f"counts per time unit (milliseconds) for each log file generated during run {run_id} of target model "
             f"\\texttt{{{target_model}}}. Each file has a maximum size of 100MB. "
             f"{get_sample_statement(None)}",
-            f"figure:{file_name}_{target_model.lower()}_{run_id}",
-            f"{file_name}_{run_id}"
+            f"figure:{file_name}{category_id}_{target_model.lower()}_{run_id}",
+            f"{file_name}{category_id}_{run_id}"
         )
     else:
         plt.show()
@@ -383,14 +392,24 @@ def plot_throughput_difference(
 
 
 def plot_throughput_report(
-        model_data: Dict, run_id: int, dimensions: Tuple[int, int], max_sum: int, max_difference: int, target_model: str
+        model_data: Dict,
+        run_id: int,
+        dimensions: Tuple[int, int],
+        max_sum: int,
+        max_difference: int,
+        target_model: str,
+        category: str = None,
 ):
     """Plot a logging throughput report for the given model run."""
-    plot_throughput_sum(model_data, run_id, dimensions, max_sum, target_model, "throughput_sum")
-    plot_throughput_difference(model_data, run_id, dimensions, max_difference, target_model, "throughput_difference")
+    plot_throughput_sum(
+        model_data, run_id, dimensions, max_sum, target_model, "throughput_sum", category
+    )
+    plot_throughput_difference(
+        model_data, run_id, dimensions, max_difference, target_model, "throughput_difference", category
+    )
 
 
-def plot_throughput_reports(model_data: Dict, target_model: str):
+def plot_throughput_reports(model_data: Dict, target_model: str, category: str = None):
     """Plot a logging throughput report for the given model results."""
     max_nr_of_timestamps = max(x.shape[0] for x in model_data["log_frequency"]["files"]["sum"])
     max_nr_of_files = max(x.shape[1] for x in model_data["log_frequency"]["files"]["sum"])
@@ -400,7 +419,7 @@ def plot_throughput_reports(model_data: Dict, target_model: str):
     max_difference = int(max(np.nanmax(v.to_numpy()) for v in model_data["log_frequency"]["files"]["difference"]))
 
     for i, _ in enumerate(model_data["log_frequency"]["files"]["sum"]):
-        plot_throughput_report(model_data, i, data_dimensions, max_sum, max_difference, target_model)
+        plot_throughput_report(model_data, i, data_dimensions, max_sum, max_difference, target_model, category)
 
 
 def format_frequency_table_index(v):
@@ -480,9 +499,10 @@ def plot_frequency_results_table(
     tabular_code = render_tabular(result_table)
     model_details = f"n={len(frequency_data.columns)}, t=30"
     if category is not None:
-        model_details += f", {category}"
+        model_details += f", \\textup{{{category}}}"
     if target_state_machine is not None:
-        model_details += f", {target_state_machine}"
+        escaped_target_state_machine = target_state_machine.replace("_", "\\_")
+        model_details += f", \\textup{{{escaped_target_state_machine}}}"
 
     title = f"Performance results for target model `\\texttt{{{target_model}}}' $({model_details})$"
     tabular_code = reformat_tabular_header(tabular_code, title)
@@ -492,7 +512,8 @@ def plot_frequency_results_table(
         f"A table containing statistics on the number of executions $(e)$, number of successful executions $(se)$ " \
         f"and success ratio $(sr)$ measured during the execution of the target model \\texttt{{{target_model}}}"
     if target_state_machine is not None:
-        caption += f" (state machine \\texttt{{{target_state_machine}}} only)"
+        escaped_target_state_machine = target_state_machine.replace("_", "\\_")
+        caption += f" (state machine \\texttt{{{escaped_target_state_machine}}} only)"
     caption += ". "
     if caption_addendum is not None:
         caption += f"{caption_addendum} "
@@ -571,15 +592,19 @@ def get_throughput_frequency_statistics_table(model_data: Dict):
 
 def plot_throughput_information_table(
         model_data: Dict,
-        target_model: str
+        target_model: str,
+        category: str = None
 ):
     """Plot a table that gives summary data on the throughput of the logging files."""
+    category_fancy = "" if category is None else f"{category}, ".replace("_", "\\_")
+    category_id = f"_{category}".lower().replace(",", "_").replace("+", "_").replace(" ", "")
+
     # Create a summary table.
     result_table, n = get_throughput_frequency_statistics_table(model_data)
 
     # Render the table and make corrections to its formatting.
     tabular_code = render_tabular(result_table)
-    model_details = f"n={n}, t=30"
+    model_details = f"{category_fancy}n={n}, t=30"
 
     title = f"Log message throughput statistics for target model `\\texttt{{{target_model}}}' $({model_details})$"
     tabular_code = reformat_tabular_header(tabular_code, title, remove_first_spacing=False)
@@ -590,8 +615,8 @@ def plot_throughput_information_table(
         f"the target model \\texttt{{{target_model}}}. The total and difference entries at the end of the table " \
         f"depict the row sum and the sum difference to the row minimum respectively. {get_sample_statement(n)}"
 
-    label = f"table:throughput_statistics_{target_model.lower()}"
-    file_name = f"throughput_statistics"
+    label = f"table:throughput_statistics_{target_model.lower()}{category_id}"
+    file_name = f"throughput_statistics{category_id}"
 
     save_table_as_tex(target_model, tabular_code, caption, label, file_name, include_resize_box=False)
 

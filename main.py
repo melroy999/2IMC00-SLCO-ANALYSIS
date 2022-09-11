@@ -201,8 +201,8 @@ def analyze_tokens_models():
 
 
 if __name__ == "__main__":
-    # analyze_counter_distributor_models()
-    # analyze_elevator_models()
+    analyze_counter_distributor_models()
+    analyze_elevator_models()
     analyze_telephony_models()
-    # analyze_toads_and_frogs_models()
-    # analyze_tokens_models()
+    analyze_toads_and_frogs_models()
+    analyze_tokens_models()
