@@ -122,6 +122,8 @@ def plot_two_column_barplot(
         boxplot_options_left = {
             "order": ordering,
             "linewidth": 0,
+            "capsize": .15,
+            "errwidth": 1
         }
         if input_boxplot_options_left is not None:
             boxplot_options_left |= input_boxplot_options_left
@@ -129,6 +131,8 @@ def plot_two_column_barplot(
         boxplot_options_right = {
             "order": ordering,
             "linewidth": 0,
+            "capsize": .15,
+            "errwidth": 1
         }
         if input_boxplot_options_right is not None:
             boxplot_options_right |= input_boxplot_options_right

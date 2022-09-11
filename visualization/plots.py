@@ -146,7 +146,9 @@ def plot_transition_frequency_comparison_boxplot(
 
     # Add identifiers for the category.
     fancy_category = f", {category}" if category is not None else ""
-    id_category = f"_{category.lower().replace(' ', '').replace(',', '')}" if category is not None else ""
+    id_category = \
+        f"_{category.lower().replace(', ', '_').replace(' ', '').replace(',', '').replace('+', '_')}" \
+        if category is not None else ""
 
     # Create two sub-figures.
     root_fig = plt.figure(figsize=(plot_width, y_scale), dpi=300)
@@ -220,7 +222,6 @@ def plot_state_machine_frequency_comparison_boxplot(
         target_model: str,
         legend_title: str,
         file_name: str = None,
-        y_scale: int = 4,
         category: str = None,
         caption_addendum: str = None
 ):
@@ -236,7 +237,9 @@ def plot_state_machine_frequency_comparison_boxplot(
 
     # Add identifiers for the category.
     fancy_category = f", {category}" if category is not None else ""
-    id_category = f"_{category.lower().replace(' ', '').replace(',', '')}" if category is not None else ""
+    id_category = \
+        f"_{category.lower().replace(', ', '_').replace(' ', '').replace(',', '').replace('+', '_')}" \
+        if category is not None else ""
 
     # How many categories are present?
     nr_of_categories = len(set(total_frequency_data["message"]))
@@ -458,12 +461,17 @@ def plot_frequency_results_table(
         target_model: str,
         target_type: str = "counting",
         category: str = None,
-        caption_addendum: str = None
+        caption_addendum: str = None,
+        target_state_machine: str = None
 ):
     """Plot the results rendered within the given table."""
     # Select the target table.
     target_columns = model_data["message_frequency"]["global"]["targets"][target_type]
     frequency_data = model_data["message_frequency"]["global"]["table"][target_columns]
+
+    if target_state_machine is not None:
+        # Filter out all other state machines.
+        frequency_data = frequency_data[frequency_data.index.str.contains(target_state_machine)]
 
     # Gather all the summary statistics.
     result_table = get_frequency_statistics_table(frequency_data, model_data)
@@ -473,6 +481,8 @@ def plot_frequency_results_table(
     model_details = f"n={len(frequency_data.columns)}, t=30"
     if category is not None:
         model_details += f", {category}"
+    if target_state_machine is not None:
+        model_details += f", {target_state_machine}"
 
     title = f"Performance results for target model `\\texttt{{{target_model}}}' $({model_details})$"
     tabular_code = reformat_tabular_header(tabular_code, title)
@@ -480,18 +490,25 @@ def plot_frequency_results_table(
     # Render the table as a file with an appropriate caption and label.
     caption = \
         f"A table containing statistics on the number of executions $(e)$, number of successful executions $(se)$ " \
-        f"and success ratio $(sr)$ measured during the execution of the target model \\texttt{{{target_model}}}. "
+        f"and success ratio $(sr)$ measured during the execution of the target model \\texttt{{{target_model}}}"
+    if target_state_machine is not None:
+        caption += f" (state machine \\texttt{{{target_state_machine}}} only)"
+    caption += ". "
     if caption_addendum is not None:
         caption += f"{caption_addendum} "
     caption += f"{get_sample_statement(len(frequency_data.columns))}"
 
     label = f"table:frequency_results_{target_model.lower()}"
     if category is not None:
-        label += f"_{category.lower()}"
+        label += f"_{category.lower().replace(' + ', '_').replace(', ', '_')}"
+    if target_state_machine is not None:
+        label += f"_{target_state_machine.lower()}"
 
     file_name = f"frequency_results"
     if category is not None:
-        file_name += f"_{category.lower()}"
+        file_name += f"_{category.lower().replace(' + ', '_').replace(', ', '_')}"
+    if target_state_machine is not None:
+        file_name += f"_{target_state_machine.lower()}"
 
     save_table_as_tex(target_model, tabular_code, caption, label, file_name)
 
