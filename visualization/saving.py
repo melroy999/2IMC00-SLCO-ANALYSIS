@@ -45,7 +45,13 @@ def save_table_as_tex(
         lines = [
             f"\\begin{{table}}[{float_modifier}]",
             "\\centering",
-            "\\resizebox{\\columnwidth}{!}{ %",
+            """\\resizebox{%
+\\ifdim\\width>\\columnwidth
+    \\columnwidth
+\\else
+    \\width
+\\fi
+}{!}{ %""",
             table_contents.strip(),
             "}",
             f"\\caption{{{caption}}}",
@@ -84,7 +90,7 @@ def save_pgf_figure_as_tex(
 \\begin{{minipage}}{{1\\textwidth}}
   \\centering
   \\makebox[\\textwidth][c]{{ %
-        \\resizebox{{1.2\\textwidth}}{{!}}{{ %
+        \\resizebox{{1.19\\textwidth}}{{!}}{{ %
             \\input{{{target_figure}}}
         }}%
     }}%

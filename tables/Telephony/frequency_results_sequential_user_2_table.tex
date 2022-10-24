@@ -1,0 +1,24 @@
+\begin{table}[htbp]
+\centering
+\resizebox{%
+\ifdim\width>\columnwidth
+    \columnwidth
+\else
+    \width
+\fi
+}{!}{ %
+\begin{tabular}{lrrrrrr}
+\toprule
+\multicolumn{7}{c}{Performance results for target model `\texttt{Telephony}' $(n=20, t=30, \textup{Sequential}, \textup{User\_2})$} \\[2mm]
+Target &            $\mu(e)$ &         $\sigma(e)$ &           $\mu(se)$ &        $\sigma(se)$ &  $\mu(sr)$ &  $\sigma(sr)$ \\
+\midrule
+\texttt{User\_2.dialing}             & $4.98 \cdot 10^{7}$ & $4.21 \cdot 10^{6}$ & $4.98 \cdot 10^{7}$ & $4.21 \cdot 10^{6}$ &     $1.00$ &        $0.00$ \\
+\hspace{3mm}User\_2.dialing.idle (p:0, id:0) & $4.98 \cdot 10^{7}$ & $4.21 \cdot 10^{6}$ & $4.98 \cdot 10^{7}$ & $4.21 \cdot 10^{6}$ &     $1.00$ &        $0.00$ \\
+\\[-8pt]\texttt{User\_2.idle}                & $4.98 \cdot 10^{7}$ & $4.21 \cdot 10^{6}$ & $4.98 \cdot 10^{7}$ & $4.21 \cdot 10^{6}$ &     $1.00$ &        $0.00$ \\
+\hspace{3mm}User\_2.idle.dialing (p:0, id:0) & $4.98 \cdot 10^{7}$ & $4.21 \cdot 10^{6}$ & $4.98 \cdot 10^{7}$ & $4.21 \cdot 10^{6}$ &     $1.00$ &        $0.00$ \\
+\bottomrule
+\end{tabular}
+}
+\caption{A table containing statistics on the number of executions $(e)$, number of successful executions $(se)$ and success ratio $(sr)$ measured during the execution of the target model \texttt{Telephony} (state machine \texttt{User\_2} only). The Java code has been generated with the `Sequential' decision mode enabled. The results have been measured over a time span of 30 seconds, where each entry is represented by measurements taken over 20 trials.}
+\label{table:frequency_results_telephony_sequential_user_2}
+\end{table}

@@ -1,0 +1,33 @@
+\begin{table}[htbp]
+\centering
+\resizebox{%
+\ifdim\width>\columnwidth
+    \columnwidth
+\else
+    \width
+\fi
+}{!}{ %
+\begin{tabular}{lrrrrrr}
+\toprule
+\multicolumn{7}{c}{Performance results for target model `\texttt{CounterDistributor}' $(n=20, t=30, \textup{Logging})$} \\[2mm]
+Target &            $\mu(e)$ &         $\sigma(e)$ &           $\mu(se)$ &        $\sigma(se)$ &            $\mu(sr)$ &         $\sigma(sr)$ \\
+\midrule
+\texttt{Counter.C}              & $2.35 \cdot 10^{6}$ & $1.49 \cdot 10^{5}$ & $2.35 \cdot 10^{6}$ & $1.49 \cdot 10^{5}$ &               $1.00$ & $9.86 \cdot 10^{-8}$ \\
+\hspace{3mm}Counter.C.C (p:0, id:0)     & $2.35 \cdot 10^{6}$ & $1.49 \cdot 10^{5}$ & $2.35 \cdot 10^{6}$ & $1.49 \cdot 10^{5}$ &               $1.00$ & $1.78 \cdot 10^{-7}$ \\
+\\[-8pt]\texttt{Distributor.P}          & $6.80 \cdot 10^{6}$ & $1.88 \cdot 10^{5}$ & $6.80 \cdot 10^{6}$ & $1.88 \cdot 10^{5}$ &               $1.00$ & $4.53 \cdot 10^{-8}$ \\
+\hspace{3mm}Distributor.P.P (p:0, id:0) & $6.80 \cdot 10^{6}$ & $1.88 \cdot 10^{5}$ & $2.53 \cdot 10^{5}$ & $2.34 \cdot 10^{4}$ & $3.72 \cdot 10^{-2}$ & $2.99 \cdot 10^{-3}$ \\
+\hspace{3mm}Distributor.P.P (p:0, id:1) & $6.55 \cdot 10^{6}$ & $1.75 \cdot 10^{5}$ & $2.39 \cdot 10^{5}$ & $2.75 \cdot 10^{4}$ & $3.64 \cdot 10^{-2}$ & $3.65 \cdot 10^{-3}$ \\
+\hspace{3mm}Distributor.P.P (p:0, id:2) & $6.31 \cdot 10^{6}$ & $1.55 \cdot 10^{5}$ & $3.07 \cdot 10^{5}$ & $4.37 \cdot 10^{4}$ & $4.86 \cdot 10^{-2}$ & $6.47 \cdot 10^{-3}$ \\
+\hspace{3mm}Distributor.P.P (p:0, id:3) & $6.00 \cdot 10^{6}$ & $1.40 \cdot 10^{5}$ & $3.57 \cdot 10^{5}$ & $3.51 \cdot 10^{4}$ & $5.95 \cdot 10^{-2}$ & $5.62 \cdot 10^{-3}$ \\
+\hspace{3mm}Distributor.P.P (p:0, id:4) & $5.65 \cdot 10^{6}$ & $1.33 \cdot 10^{5}$ & $4.86 \cdot 10^{5}$ & $4.71 \cdot 10^{4}$ & $8.60 \cdot 10^{-2}$ & $7.85 \cdot 10^{-3}$ \\
+\hspace{3mm}Distributor.P.P (p:0, id:5) & $5.16 \cdot 10^{6}$ & $1.26 \cdot 10^{5}$ & $6.22 \cdot 10^{5}$ & $2.51 \cdot 10^{4}$ & $1.20 \cdot 10^{-1}$ & $5.25 \cdot 10^{-3}$ \\
+\hspace{3mm}Distributor.P.P (p:0, id:6) & $4.54 \cdot 10^{6}$ & $1.23 \cdot 10^{5}$ & $8.42 \cdot 10^{5}$ & $4.73 \cdot 10^{4}$ & $1.86 \cdot 10^{-1}$ & $1.26 \cdot 10^{-2}$ \\
+\hspace{3mm}Distributor.P.P (p:0, id:7) & $3.70 \cdot 10^{6}$ & $1.40 \cdot 10^{5}$ & $1.09 \cdot 10^{6}$ & $3.94 \cdot 10^{4}$ & $2.95 \cdot 10^{-1}$ & $1.11 \cdot 10^{-2}$ \\
+\hspace{3mm}Distributor.P.P (p:0, id:8) & $2.61 \cdot 10^{6}$ & $1.24 \cdot 10^{5}$ & $1.26 \cdot 10^{6}$ & $7.25 \cdot 10^{4}$ & $4.82 \cdot 10^{-1}$ & $8.51 \cdot 10^{-3}$ \\
+\hspace{3mm}Distributor.P.P (p:0, id:9) & $1.35 \cdot 10^{6}$ & $5.77 \cdot 10^{4}$ & $1.35 \cdot 10^{6}$ & $5.77 \cdot 10^{4}$ &               $1.00$ &               $0.00$ \\
+\bottomrule
+\end{tabular}
+}
+\caption{A table containing statistics on the number of executions $(e)$, number of successful executions $(se)$ and success ratio $(sr)$ measured during the execution of the target model \texttt{CounterDistributor}. The Java code has been generated using the default settings and the results have been attained through logging-based measurements. The results have been measured over a time span of 30 seconds, where each entry is represented by measurements taken over 20 trials.}
+\label{table:frequency_results_counterdistributor_logging}
+\end{table}

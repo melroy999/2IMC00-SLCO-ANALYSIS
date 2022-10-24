@@ -1,0 +1,25 @@
+\begin{table}[b!]
+\centering
+\resizebox{%
+\ifdim\width>\columnwidth
+    \columnwidth
+\else
+    \width
+\fi
+}{!}{ %
+\begin{tabular}{lrrrrrr}
+\toprule
+\multicolumn{7}{c}{Log message throughput statistics for target model `\texttt{ToadsAndFrogs}' $(n=20, t=30)$} \\[2mm]
+Target \hspace{3.5cm} &     $N$ &  $min(e)$ &            $max(e)$ &         $median(e)$ &            $\mu(e)$ &         $\sigma(e)$ \\
+\midrule
+\texttt{control}       &  600020 &    $0.00$ & $3.27 \cdot 10^{3}$ & $9.64 \cdot 10^{2}$ & $9.68 \cdot 10^{2}$ & $2.13 \cdot 10^{2}$ \\
+\texttt{frog}          &  600020 &    $0.00$ & $2.63 \cdot 10^{3}$ & $7.93 \cdot 10^{2}$ & $7.92 \cdot 10^{2}$ & $1.54 \cdot 10^{2}$ \\
+\texttt{toad}          &  600020 &    $0.00$ & $4.25 \cdot 10^{3}$ & $7.96 \cdot 10^{2}$ & $7.99 \cdot 10^{2}$ & $1.60 \cdot 10^{2}$ \\
+\\[-8pt]\textit{total} &  600020 &    $0.00$ & $6.00 \cdot 10^{3}$ & $2.58 \cdot 10^{3}$ & $2.56 \cdot 10^{3}$ & $3.80 \cdot 10^{2}$ \\
+\textit{difference}    &  600020 &    $0.00$ & $4.27 \cdot 10^{3}$ & $2.82 \cdot 10^{2}$ & $3.38 \cdot 10^{2}$ & $2.54 \cdot 10^{2}$ \\
+\bottomrule
+\end{tabular}
+}
+\caption{A table containing statistics on the log messages per milliseconds $(e)$ measured during the execution of the target model \texttt{ToadsAndFrogs} grouped by state machine. The total and difference entries at the end of the table depict the row sum and the sum difference to the row minimum respectively. The results have been measured over a time span of 30 seconds, where each entry is represented by measurements taken over 20 trials.}
+\label{table:throughput_statistics_toadsandfrogs}
+\end{table}

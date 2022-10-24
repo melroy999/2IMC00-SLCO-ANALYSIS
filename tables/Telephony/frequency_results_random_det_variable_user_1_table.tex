@@ -1,0 +1,60 @@
+\begin{table}[htbp]
+\centering
+\resizebox{%
+\ifdim\width>\columnwidth
+    \columnwidth
+\else
+    \width
+\fi
+}{!}{ %
+\begin{tabular}{lrrrrrr}
+\toprule
+\multicolumn{7}{c}{Performance results for target model `\texttt{Telephony}' $(n=20, t=30, \textup{Random + Det, Variable}, \textup{User\_1})$} \\[2mm]
+Target &             $\mu(e)$ &          $\sigma(e)$ &            $\mu(se)$ &         $\sigma(se)$ &            $\mu(sr)$ &         $\sigma(sr)$ \\
+\midrule
+\texttt{User\_1.busy}                         &  $4.57 \cdot 10^{6}$ &  $5.23 \cdot 10^{6}$ &  $4.57 \cdot 10^{6}$ &  $5.23 \cdot 10^{6}$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}User\_1.busy.idle (p:0, id:0)             &  $4.57 \cdot 10^{6}$ &  $5.23 \cdot 10^{6}$ &  $4.57 \cdot 10^{6}$ &  $5.23 \cdot 10^{6}$ &               $1.00$ &               $0.00$ \\
+\\[-8pt]\texttt{User\_1.calling}                      &  $7.98 \cdot 10^{6}$ &  $9.14 \cdot 10^{6}$ &  $7.98 \cdot 10^{6}$ &  $9.14 \cdot 10^{6}$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}User\_1.calling.busy (p:0, id:0)          &  $7.98 \cdot 10^{6}$ &  $9.14 \cdot 10^{6}$ &  $2.27 \cdot 10^{6}$ &  $2.60 \cdot 10^{6}$ & $2.99 \cdot 10^{-1}$ & $1.47 \cdot 10^{-1}$ \\
+\hspace{3mm}User\_1.calling.unobtainable (p:0, id:1)  &  $5.38 \cdot 10^{5}$ &  $6.15 \cdot 10^{5}$ &  $5.38 \cdot 10^{5}$ &  $6.15 \cdot 10^{5}$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}User\_1.calling.ringback (p:0, id:2)      &  $5.37 \cdot 10^{5}$ &  $6.14 \cdot 10^{5}$ &  $5.37 \cdot 10^{5}$ &  $6.14 \cdot 10^{5}$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}User\_1.calling.busy (p:0, id:3)          &  $4.64 \cdot 10^{6}$ &  $5.32 \cdot 10^{6}$ &  $2.30 \cdot 10^{6}$ &  $2.64 \cdot 10^{6}$ & $5.18 \cdot 10^{-1}$ & $2.22 \cdot 10^{-1}$ \\
+\hspace{3mm}User\_1.calling.calling (p:0, id:4)       &  $2.34 \cdot 10^{6}$ &  $2.69 \cdot 10^{6}$ &  $2.34 \cdot 10^{6}$ &  $2.69 \cdot 10^{6}$ & $9.82 \cdot 10^{-1}$ & $4.73 \cdot 10^{-2}$ \\
+\hspace{3mm}User\_1.calling.oalert (p:0, id:5)        &               $1.15$ &               $1.31$ &               $1.15$ &               $1.31$ &               $1.00$ &               $0.00$ \\
+\\[-8pt]\texttt{User\_1.dialing}                      &  $6.45 \cdot 10^{6}$ &  $7.38 \cdot 10^{6}$ &  $6.45 \cdot 10^{6}$ &  $7.38 \cdot 10^{6}$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}User\_1.dialing.idle (p:0, id:0)          &  $1.07 \cdot 10^{6}$ &  $1.23 \cdot 10^{6}$ &  $1.07 \cdot 10^{6}$ &  $1.23 \cdot 10^{6}$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}User\_1.dialing.calling (p:0, id:1)       &  $1.08 \cdot 10^{6}$ &  $1.23 \cdot 10^{6}$ &  $1.08 \cdot 10^{6}$ &  $1.23 \cdot 10^{6}$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}User\_1.dialing.calling (p:0, id:2)       &  $1.08 \cdot 10^{6}$ &  $1.23 \cdot 10^{6}$ &  $1.08 \cdot 10^{6}$ &  $1.23 \cdot 10^{6}$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}User\_1.dialing.calling (p:0, id:3)       &  $1.07 \cdot 10^{6}$ &  $1.23 \cdot 10^{6}$ &  $1.07 \cdot 10^{6}$ &  $1.23 \cdot 10^{6}$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}User\_1.dialing.calling (p:0, id:4)       &  $1.08 \cdot 10^{6}$ &  $1.23 \cdot 10^{6}$ &  $1.08 \cdot 10^{6}$ &  $1.23 \cdot 10^{6}$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}User\_1.dialing.calling (p:0, id:5)       &  $1.08 \cdot 10^{6}$ &  $1.23 \cdot 10^{6}$ &  $1.08 \cdot 10^{6}$ &  $1.23 \cdot 10^{6}$ &               $1.00$ &               $0.00$ \\
+\\[-8pt]\texttt{User\_1.dveoringout}                  &               $1.15$ &               $1.31$ &               $1.15$ &               $1.31$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}User\_1.dveoringout.idle (p:0, id:0)      &               $1.15$ &               $1.31$ &               $1.15$ &               $1.31$ &               $1.00$ &               $0.00$ \\
+\\[-8pt]\texttt{User\_1.idle}                         &  $2.23 \cdot 10^{7}$ &  $1.03 \cdot 10^{7}$ &  $2.23 \cdot 10^{7}$ &  $1.03 \cdot 10^{7}$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}User\_1.idle.dialing (p:0, id:0)          &  $2.23 \cdot 10^{7}$ &  $1.03 \cdot 10^{7}$ &  $6.45 \cdot 10^{6}$ &  $7.38 \cdot 10^{6}$ & $4.97 \cdot 10^{-1}$ & $5.10 \cdot 10^{-1}$ \\
+\hspace{3mm}User\_1.idle.qi (p:0, id:1)               &  $1.59 \cdot 10^{7}$ &  $1.64 \cdot 10^{7}$ &  $1.59 \cdot 10^{7}$ &  $1.64 \cdot 10^{7}$ &               $1.00$ &               $0.00$ \\
+\\[-8pt]\texttt{User\_1.oalert}                       &               $1.15$ &               $1.31$ &               $1.15$ &               $1.31$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}User\_1.oalert.dveoringout (p:0, id:2)    &               $1.15$ &               $1.31$ &               $1.15$ &               $1.31$ &               $1.00$ &               $0.00$ \\
+\\[-8pt]\texttt{User\_1.qi}                           &  $1.59 \cdot 10^{7}$ &  $1.64 \cdot 10^{7}$ &  $1.59 \cdot 10^{7}$ &  $1.64 \cdot 10^{7}$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}User\_1.qi.talert (p:0, id:0)             &  $1.59 \cdot 10^{7}$ &  $1.64 \cdot 10^{7}$ & $4.50 \cdot 10^{-1}$ & $6.05 \cdot 10^{-1}$ & $2.31 \cdot 10^{-1}$ & $4.39 \cdot 10^{-1}$ \\
+\hspace{3mm}User\_1.qi.idle (p:0, id:1)               &  $1.59 \cdot 10^{7}$ &  $1.64 \cdot 10^{7}$ &  $1.59 \cdot 10^{7}$ &  $1.64 \cdot 10^{7}$ &               $1.00$ &               $0.00$ \\
+\\[-8pt]\texttt{User\_1.ringback}                     &  $5.37 \cdot 10^{5}$ &  $6.14 \cdot 10^{5}$ &  $5.37 \cdot 10^{5}$ &  $6.14 \cdot 10^{5}$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}User\_1.ringback.idle (p:0, id:0)         &  $2.69 \cdot 10^{5}$ &  $3.07 \cdot 10^{5}$ &  $2.69 \cdot 10^{5}$ &  $3.07 \cdot 10^{5}$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}User\_1.ringback.calling (p:0, id:1)      &  $2.69 \cdot 10^{5}$ &  $3.07 \cdot 10^{5}$ &  $2.69 \cdot 10^{5}$ &  $3.07 \cdot 10^{5}$ &               $1.00$ &               $0.00$ \\
+\\[-8pt]\texttt{User\_1.talert}                       & $7.50 \cdot 10^{-1}$ &               $1.07$ & $4.50 \cdot 10^{-1}$ & $6.05 \cdot 10^{-1}$ & $7.08 \cdot 10^{-1}$ & $3.18 \cdot 10^{-1}$ \\
+\hspace{3mm}User\_1.talert.tpickup (p:0, id:1)        & $4.50 \cdot 10^{-1}$ & $6.05 \cdot 10^{-1}$ & $2.00 \cdot 10^{-1}$ & $5.23 \cdot 10^{-1}$ & $3.75 \cdot 10^{-1}$ & $5.18 \cdot 10^{-1}$ \\
+\hspace{3mm}User\_1.talert.idle (p:0, id:2)           & $2.50 \cdot 10^{-1}$ & $4.44 \cdot 10^{-1}$ & $2.50 \cdot 10^{-1}$ & $4.44 \cdot 10^{-1}$ &               $1.00$ &               $0.00$ \\
+\\[-8pt]\texttt{User\_1.tconnected}                   &  $4.74 \cdot 10^{6}$ &  $2.12 \cdot 10^{7}$ &  $4.74 \cdot 10^{6}$ &  $2.12 \cdot 10^{7}$ & $8.15 \cdot 10^{-1}$ & $3.21 \cdot 10^{-1}$ \\
+\hspace{3mm}User\_1.tconnected.tconnected (p:0, id:0) &  $4.74 \cdot 10^{6}$ &  $2.12 \cdot 10^{7}$ &  $2.37 \cdot 10^{6}$ &  $1.06 \cdot 10^{7}$ & $3.74 \cdot 10^{-1}$ & $1.41 \cdot 10^{-1}$ \\
+\hspace{3mm}User\_1.tconnected.tconnected (p:0, id:1) &  $2.37 \cdot 10^{6}$ &  $1.06 \cdot 10^{7}$ &  $2.37 \cdot 10^{6}$ &  $1.06 \cdot 10^{7}$ & $6.03 \cdot 10^{-1}$ & $4.32 \cdot 10^{-1}$ \\
+\hspace{3mm}User\_1.tconnected.idle (p:0, id:2)       & $6.00 \cdot 10^{-1}$ &               $1.70$ & $1.50 \cdot 10^{-1}$ & $3.66 \cdot 10^{-1}$ & $4.56 \cdot 10^{-1}$ & $4.72 \cdot 10^{-1}$ \\
+\\[-8pt]\texttt{User\_1.tpickup}                      & $2.00 \cdot 10^{-1}$ & $5.23 \cdot 10^{-1}$ & $2.00 \cdot 10^{-1}$ & $5.23 \cdot 10^{-1}$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}User\_1.tpickup.tconnected (p:0, id:0)    & $2.00 \cdot 10^{-1}$ & $5.23 \cdot 10^{-1}$ & $2.00 \cdot 10^{-1}$ & $5.23 \cdot 10^{-1}$ &               $1.00$ &               $0.00$ \\
+\\[-8pt]\texttt{User\_1.unobtainable}                 &  $5.38 \cdot 10^{5}$ &  $6.15 \cdot 10^{5}$ &  $5.38 \cdot 10^{5}$ &  $6.15 \cdot 10^{5}$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}User\_1.unobtainable.idle (p:0, id:0)     &  $5.38 \cdot 10^{5}$ &  $6.15 \cdot 10^{5}$ &  $5.38 \cdot 10^{5}$ &  $6.15 \cdot 10^{5}$ &               $1.00$ &               $0.00$ \\
+\bottomrule
+\end{tabular}
+}
+\caption{A table containing statistics on the number of executions $(e)$, number of successful executions $(se)$ and success ratio $(sr)$ measured during the execution of the target model \texttt{Telephony} (state machine \texttt{User\_1} only). The Java code has been generated with the `Random + Det' decision mode and `Variable' locking mode enabled. The results have been measured over a time span of 30 seconds, where each entry is represented by measurements taken over 20 trials.}
+\label{table:frequency_results_telephony_random_det_variable_user_1}
+\end{table}

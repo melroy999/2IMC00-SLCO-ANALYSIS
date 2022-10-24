@@ -1,0 +1,26 @@
+\begin{table}[b!]
+\centering
+\resizebox{%
+\ifdim\width>\columnwidth
+    \columnwidth
+\else
+    \width
+\fi
+}{!}{ %
+\begin{tabular}{lrrrrrr}
+\toprule
+\multicolumn{7}{c}{Log message throughput statistics for target model `\texttt{Telephony}' $(Random + Det, n=20, t=30)$} \\[2mm]
+Target \hspace{3.5cm} &     $N$ &  $min(e)$ &            $max(e)$ &         $median(e)$ &            $\mu(e)$ &         $\sigma(e)$ \\
+\midrule
+\texttt{User\_0}        &  600020 &    $0.00$ & $4.89 \cdot 10^{3}$ & $1.08 \cdot 10^{3}$ & $1.06 \cdot 10^{3}$ & $1.87 \cdot 10^{2}$ \\
+\texttt{User\_1}        &  600020 &    $0.00$ & $4.35 \cdot 10^{3}$ & $1.12 \cdot 10^{3}$ & $1.11 \cdot 10^{3}$ & $1.84 \cdot 10^{2}$ \\
+\texttt{User\_2}        &  600020 &    $0.00$ & $6.30 \cdot 10^{3}$ & $1.12 \cdot 10^{3}$ & $1.10 \cdot 10^{3}$ & $1.94 \cdot 10^{2}$ \\
+\texttt{User\_3}        &  600020 &    $0.00$ & $5.37 \cdot 10^{3}$ & $1.10 \cdot 10^{3}$ & $1.09 \cdot 10^{3}$ & $1.91 \cdot 10^{2}$ \\
+\\[-8pt]\textit{total} &  600020 &    $0.00$ & $1.07 \cdot 10^{4}$ & $4.46 \cdot 10^{3}$ & $4.36 \cdot 10^{3}$ & $6.50 \cdot 10^{2}$ \\
+\textit{difference}    &  600020 &    $0.00$ & $1.07 \cdot 10^{4}$ & $4.15 \cdot 10^{2}$ & $4.39 \cdot 10^{2}$ & $2.34 \cdot 10^{2}$ \\
+\bottomrule
+\end{tabular}
+}
+\caption{A table containing statistics on the log messages per milliseconds $(e)$ measured during the execution of the target model \texttt{Telephony} grouped by state machine. The total and difference entries at the end of the table depict the row sum and the sum difference to the row minimum respectively. The results have been measured over a time span of 30 seconds, where each entry is represented by measurements taken over 20 trials.}
+\label{table:throughput_statistics_telephony_random_det}
+\end{table}

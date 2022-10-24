@@ -154,8 +154,8 @@ def plot_transition_frequency_comparison_boxplot(
     root_fig = plt.figure(figsize=(plot_width, y_scale), dpi=300)
     plot_two_column_barplot(
         success_frequency_data, success_ratio_data, root_fig,
-        title_left="Success Count",
-        title_right="Success/Total Ratio",
+        title_left="Success Count $(se)$",
+        title_right="Success/Total Ratio $(sr)$",
         y_label="Subject",
         x_label_left="Count (Logarithmic Scale)" if log_scale else "Count",
         x_label_right="Percentage",
@@ -179,9 +179,9 @@ def plot_transition_frequency_comparison_boxplot(
                                 "logarithmic scale, due to the wide range of measured values: the first " \
                                 "column adheres to a linear scale; all subsequent columns are logarithmic. "
         caption = \
-            "A bar plot that reports the number of successful executions and the percentage of successful " \
-            f"executions for each decision node and transition in the target model \\texttt{{{target_model}}}, where " \
-            f"the results are grouped by the {legend_title.lower()}. "
+            "A bar plot that reports the number of successful executions $(se)$ and the percentage of successful " \
+            f"executions $(sr)$ for each decision node and transition in the target model \\texttt{{{target_model}}}" \
+            f", where the results are grouped by the {legend_title.lower()}. "
         if caption_addendum is not None:
             caption += f"{caption_addendum} "
         caption += f"{log_scale_comment}{get_sample_statement(n)}"
@@ -228,12 +228,12 @@ def plot_state_machine_frequency_comparison_boxplot(
     """Plot the state machine frequencies recorded in the given models."""
     # Plot the number of transitions and the successful transitions side by side in a boxplot grouped by state machine.
     sm_frequency_data = {i: extract_state_machine_level_data(v) for i, v in frequency_data.items()}
-    target_data_entries = [extract_frequency_data(v, model_data, i) for i, v in sm_frequency_data.items()]
-    total_frequency_data = pd.concat([v[0] for v in target_data_entries])
-    success_frequency_data = pd.concat([v[1] for v in target_data_entries])
+    target_data_entries = [extract_success_data(v, model_data, i) for i, v in sm_frequency_data.items()]
+    success_frequency_data = pd.concat([v[0] for v in target_data_entries])
+    success_ratio_data = pd.concat([v[1] for v in target_data_entries])
 
     # Check if a logarithmic scale needs to be used to keep the data readable.
-    log_scale = use_log_scale(total_frequency_data) or use_log_scale(success_frequency_data)
+    log_scale = use_log_scale(success_frequency_data)
 
     # Add identifiers for the category.
     fancy_category = f", {category}" if category is not None else ""
@@ -242,25 +242,26 @@ def plot_state_machine_frequency_comparison_boxplot(
         if category is not None else ""
 
     # How many categories are present?
-    nr_of_state_machines = len(set(total_frequency_data["message"]))
-    y_scale = 1 + (nr_of_state_machines * len(frequency_data)) / 4.0
+    nr_of_state_machines = len(set(success_frequency_data["message"]))
+    nr_of_categories = len(frequency_data)
+    y_scale = 1 + (nr_of_state_machines * 2) / 4.0
 
     # Create two sub-figures.
     root_fig = plt.figure(figsize=(plot_width, y_scale), dpi=300)
     plot_two_column_barplot(
-        total_frequency_data, success_frequency_data, root_fig,
-        title_left="Total Count",
-        title_right="Success Count",
+        success_frequency_data, success_ratio_data, root_fig,
+        title_left="Success Count $(se)$",
+        title_right="Success/Total Ratio $(sr)$",
         y_label="State Machine",
         x_label_left="Count (Logarithmic Scale)" if log_scale else "Count",
-        x_label_right="Count (Logarithmic Scale)" if log_scale else "Count",
+        x_label_right="Percentage",
         hue="type",
         left_margin_function=set_logarithmic_margins if log_scale else set_numeric_margins,
-        right_margin_function=set_logarithmic_margins if log_scale else set_numeric_margins,
+        right_margin_function=set_percentage_margins,
     )
 
     n = min(len(df.columns) for df in frequency_data.values())
-    root_fig.suptitle(f"Transition Executions ({target_model}{fancy_category}, n={n}, t=30)", y=1.00)
+    root_fig.suptitle(f"Successful Transition Executions ({target_model}{fancy_category}, n={n}, t=30)", y=1.00)
 
     # Put the legend outside of the plot.
     plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., title=legend_title)
@@ -270,13 +271,13 @@ def plot_state_machine_frequency_comparison_boxplot(
     if file_name is not None:
         log_scale_comment = ""
         if log_scale:
-            log_scale_comment = "Observe that the total count and success count are depicted in a " \
-                                "linear-logarithmic scale, due to the wide range of measured values: the first " \
+            log_scale_comment = "Observe that the success count is depicted in a " \
+                                "logarithmic scale, due to the wide range of measured values: the first " \
                                 "column adheres to a linear scale; all subsequent columns are logarithmic. "
         caption = \
-            "A bar plot that reports the number of total and successful transition executions for each state " \
-            f"machine in the target model \\texttt{{{target_model}}}, where the results are grouped by the " \
-            f"{legend_title.lower()}. "
+            f"A bar plot that reports the number of successful executions $(se)$ and the percentage of successful " \
+            f"executions $(sr)$ for each state machine in the target model \\texttt{{{target_model}}}, where the " \
+            f"results are grouped by the {legend_title.lower()}. "
         if caption_addendum is not None:
             caption += f"{caption_addendum} "
         caption += f"{log_scale_comment}{get_sample_statement(n)}"
@@ -289,7 +290,7 @@ def plot_state_machine_frequency_comparison_boxplot(
             caption,
             f"figure:{file_name}_{target_model.lower()}{id_category}",
             f"{file_name}{id_category}",
-            float_modifier="h!"
+            float_modifier="ht!"
         )
     else:
         plt.show()
@@ -331,7 +332,7 @@ def plot_throughput_sum(
         save_png_figure_as_tex(
             target_model,
             target_png_figure,
-            f"A heatmap plot that reports on the total number of log messages per time unit (milliseconds) for each "
+            f"A heat map plot that reports on the total number of log messages per time unit (milliseconds) for each "
             f"log file generated during run {run_id} of target model \\texttt{{{target_model}}}. Each file has a "
             f"maximum size of 100MB. {get_sample_statement(None)}",
             f"figure:{file_name}{category_id}_{target_model.lower()}_{run_id}",
@@ -364,7 +365,8 @@ def plot_throughput_difference(
         title=f"Logging Throughput Difference ({target_model}{category_fancy}, Run {run_id}, t=30)",
         x_label="Timestamp (ms)",
         y_label="File Number",
-        c_bar_label="Sum Difference To Row Minimum",
+        # c_bar_label="Sum Difference To Row Minimum",
+        c_bar_label="Sum Diff To Row Min",
         data_dimensions=dimensions,
         input_pcolormesh_options={
             "vmax": max_value
@@ -378,7 +380,7 @@ def plot_throughput_difference(
             target_model,
             target_png_figure,
 
-            f"A heatmap plot that reports on the sum difference to the row minimum of the state machines' log message "
+            f"A heat map plot that reports on the sum difference to the row minimum of the state machines' log message "
             f"counts per time unit (milliseconds) for each log file generated during run {run_id} of target model "
             f"\\texttt{{{target_model}}}. Each file has a maximum size of 100MB. "
             f"{get_sample_statement(None)}",
@@ -413,7 +415,9 @@ def plot_throughput_reports(model_data: Dict, target_model: str, category: str =
     """Plot a logging throughput report for the given model results."""
     max_nr_of_timestamps = max(x.shape[0] for x in model_data["log_frequency"]["files"]["sum"])
     max_nr_of_files = max(x.shape[1] for x in model_data["log_frequency"]["files"]["sum"])
-    data_dimensions = (max_nr_of_files, max_nr_of_timestamps)
+    # TODO: only a single entry is reported, so matching dimensions would only lead to confusion.
+    # data_dimensions = (max_nr_of_files, max_nr_of_timestamps)
+    data_dimensions = None
 
     max_sum = int(max(np.nanmax(v.to_numpy()) for v in model_data["log_frequency"]["files"]["sum"]))
     max_difference = int(max(np.nanmax(v.to_numpy()) for v in model_data["log_frequency"]["files"]["difference"]))
@@ -425,7 +429,7 @@ def plot_throughput_reports(model_data: Dict, target_model: str, category: str =
 def format_frequency_table_index(v):
     """Format the given target."""
     if v.count(".") < 2:
-        return f"\\\\[-8pt]\\textbf{{{v}}}"
+        return f"\\\\[-8pt]\\texttt{{{v}}}"
     else:
         return f"\\hspace{{3mm}}{v}"
 
@@ -536,10 +540,12 @@ def plot_frequency_results_table(
 
 def format_throughput_table_index(v):
     """Format the given target."""
-    if v in ["total", "difference"]:
+    if v in ["total"]:
         return f"\\\\[-8pt]\\textit{{{v}}}"
+    elif v in ["difference"]:
+        return f"\\textit{{{v}}}"
     else:
-        return f"{v}"
+        return f"\\texttt{{{v}}}"
 
 
 def get_throughput_frequency_statistics_table(model_data: Dict):
@@ -597,7 +603,9 @@ def plot_throughput_information_table(
 ):
     """Plot a table that gives summary data on the throughput of the logging files."""
     category_fancy = "" if category is None else f"{category}, ".replace("_", "\\_")
-    category_id = f"_{category}".lower().replace(",", "_").replace("+", "_").replace(" ", "")
+    category_id = ""
+    if category is not None:
+        category_id = f"_{category}".lower().replace(",", "_").replace("+", "_").replace(" ", "")
 
     # Create a summary table.
     result_table, n = get_throughput_frequency_statistics_table(model_data)
@@ -608,17 +616,21 @@ def plot_throughput_information_table(
 
     title = f"Log message throughput statistics for target model `\\texttt{{{target_model}}}' $({model_details})$"
     tabular_code = reformat_tabular_header(tabular_code, title, remove_first_spacing=False)
+    tabular_code = tabular_code.replace("Target", "Target \\hspace{3.5cm}")
 
     # Render the table as a file with an appropriate caption and label.
     caption = \
         f"A table containing statistics on the log messages per milliseconds $(e)$ measured during the execution of " \
-        f"the target model \\texttt{{{target_model}}}. The total and difference entries at the end of the table " \
-        f"depict the row sum and the sum difference to the row minimum respectively. {get_sample_statement(n)}"
+        f"the target model \\texttt{{{target_model}}} grouped by state machine. The total and difference entries at " \
+        f"the end of the table depict the row sum and the sum difference to the row minimum respectively. " \
+        f"{get_sample_statement(n)}"
 
     label = f"table:throughput_statistics_{target_model.lower()}{category_id}"
     file_name = f"throughput_statistics{category_id}"
 
-    save_table_as_tex(target_model, tabular_code, caption, label, file_name, include_resize_box=False)
+    save_table_as_tex(
+        target_model, tabular_code, caption, label, file_name, include_resize_box=True, float_modifier="b!"
+    )
 
 
 def get_sample_statement(n: Optional[int]) -> str:

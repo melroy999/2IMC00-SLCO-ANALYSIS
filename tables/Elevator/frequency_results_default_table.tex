@@ -1,0 +1,41 @@
+\begin{table}[htbp]
+\centering
+\resizebox{%
+\ifdim\width>\columnwidth
+    \columnwidth
+\else
+    \width
+\fi
+}{!}{ %
+\begin{tabular}{lrrrrrr}
+\toprule
+\multicolumn{7}{c}{Performance results for target model `\texttt{Elevator}' $(n=20, t=30, \textup{Default})$} \\[2mm]
+Target &            $\mu(e)$ &         $\sigma(e)$ &           $\mu(se)$ &        $\sigma(se)$ &            $\mu(sr)$ &         $\sigma(sr)$ \\
+\midrule
+\texttt{cabin.idle}                   & $1.77 \cdot 10^{8}$ & $3.69 \cdot 10^{7}$ & $6.47 \cdot 10^{6}$ & $1.09 \cdot 10^{6}$ & $3.70 \cdot 10^{-2}$ & $4.12 \cdot 10^{-3}$ \\
+\hspace{3mm}cabin.idle.mov (p:0, id:0)        & $1.77 \cdot 10^{8}$ & $3.69 \cdot 10^{7}$ & $6.47 \cdot 10^{6}$ & $1.09 \cdot 10^{6}$ & $3.70 \cdot 10^{-2}$ & $4.12 \cdot 10^{-3}$ \\
+\\[-8pt]\texttt{cabin.mov}                    & $1.13 \cdot 10^{7}$ & $1.92 \cdot 10^{6}$ & $1.13 \cdot 10^{7}$ & $1.92 \cdot 10^{6}$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}cabin.mov.open (p:0, id:0)        & $1.13 \cdot 10^{7}$ & $1.92 \cdot 10^{6}$ & $6.47 \cdot 10^{6}$ & $1.09 \cdot 10^{6}$ & $5.71 \cdot 10^{-1}$ & $4.01 \cdot 10^{-4}$ \\
+\hspace{3mm}cabin.mov.mov (p:0, id:1)         & $4.87 \cdot 10^{6}$ & $8.21 \cdot 10^{5}$ & $2.43 \cdot 10^{6}$ & $4.11 \cdot 10^{5}$ & $5.00 \cdot 10^{-1}$ & $1.06 \cdot 10^{-7}$ \\
+\hspace{3mm}cabin.mov.mov (p:0, id:2)         & $2.43 \cdot 10^{6}$ & $4.11 \cdot 10^{5}$ & $2.43 \cdot 10^{6}$ & $4.11 \cdot 10^{5}$ &               $1.00$ &               $0.00$ \\
+\\[-8pt]\texttt{cabin.open}                   & $6.47 \cdot 10^{6}$ & $1.09 \cdot 10^{6}$ & $6.47 \cdot 10^{6}$ & $1.09 \cdot 10^{6}$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}cabin.open.idle (p:0, id:0)       & $6.47 \cdot 10^{6}$ & $1.09 \cdot 10^{6}$ & $6.47 \cdot 10^{6}$ & $1.09 \cdot 10^{6}$ &               $1.00$ &               $0.00$ \\
+\\[-8pt]\texttt{controller.done}              & $6.47 \cdot 10^{6}$ & $1.09 \cdot 10^{6}$ & $6.47 \cdot 10^{6}$ & $1.09 \cdot 10^{6}$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}controller.done.wait (p:0, id:0)  & $6.47 \cdot 10^{6}$ & $1.09 \cdot 10^{6}$ & $6.47 \cdot 10^{6}$ & $1.09 \cdot 10^{6}$ &               $1.00$ &               $0.00$ \\
+\\[-8pt]\texttt{controller.wait}              & $4.78 \cdot 10^{7}$ & $8.59 \cdot 10^{6}$ & $8.14 \cdot 10^{6}$ & $1.38 \cdot 10^{6}$ & $1.72 \cdot 10^{-1}$ & $1.69 \cdot 10^{-2}$ \\
+\hspace{3mm}controller.wait.work (p:0, id:0)  & $4.78 \cdot 10^{7}$ & $8.59 \cdot 10^{6}$ & $8.14 \cdot 10^{6}$ & $1.38 \cdot 10^{6}$ & $1.72 \cdot 10^{-1}$ & $1.69 \cdot 10^{-2}$ \\
+\\[-8pt]\texttt{controller.work}              & $8.38 \cdot 10^{6}$ & $1.42 \cdot 10^{6}$ & $8.38 \cdot 10^{6}$ & $1.42 \cdot 10^{6}$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}controller.work.wait (p:0, id:0)  & $8.38 \cdot 10^{6}$ & $1.42 \cdot 10^{6}$ & $1.68 \cdot 10^{6}$ & $2.84 \cdot 10^{5}$ & $2.00 \cdot 10^{-1}$ & $2.63 \cdot 10^{-8}$ \\
+\hspace{3mm}controller.work.done (p:0, id:1)  & $6.70 \cdot 10^{6}$ & $1.14 \cdot 10^{6}$ & $6.47 \cdot 10^{6}$ & $1.09 \cdot 10^{6}$ & $9.65 \cdot 10^{-1}$ & $1.99 \cdot 10^{-2}$ \\
+\hspace{3mm}controller.work.work (p:0, id:2)  & $2.34 \cdot 10^{5}$ & $1.45 \cdot 10^{5}$ & $2.34 \cdot 10^{5}$ & $1.45 \cdot 10^{5}$ &               $1.00$ &               $0.00$ \\
+\\[-8pt]\texttt{environment.read}             & $1.30 \cdot 10^{8}$ & $2.49 \cdot 10^{7}$ & $6.47 \cdot 10^{6}$ & $1.09 \cdot 10^{6}$ & $5.03 \cdot 10^{-2}$ & $7.92 \cdot 10^{-3}$ \\
+\hspace{3mm}environment.read.read (p:0, id:0) & $1.30 \cdot 10^{8}$ & $2.49 \cdot 10^{7}$ & $1.62 \cdot 10^{6}$ & $2.74 \cdot 10^{5}$ & $1.26 \cdot 10^{-2}$ & $1.96 \cdot 10^{-3}$ \\
+\hspace{3mm}environment.read.read (p:0, id:1) & $1.29 \cdot 10^{8}$ & $2.48 \cdot 10^{7}$ & $1.62 \cdot 10^{6}$ & $2.74 \cdot 10^{5}$ & $1.27 \cdot 10^{-2}$ & $2.05 \cdot 10^{-3}$ \\
+\hspace{3mm}environment.read.read (p:0, id:2) & $1.27 \cdot 10^{8}$ & $2.46 \cdot 10^{7}$ & $1.62 \cdot 10^{6}$ & $2.74 \cdot 10^{5}$ & $1.29 \cdot 10^{-2}$ & $2.11 \cdot 10^{-3}$ \\
+\hspace{3mm}environment.read.read (p:0, id:3) & $1.26 \cdot 10^{8}$ & $2.44 \cdot 10^{7}$ & $1.62 \cdot 10^{6}$ & $2.73 \cdot 10^{5}$ & $1.31 \cdot 10^{-2}$ & $2.16 \cdot 10^{-3}$ \\
+\bottomrule
+\end{tabular}
+}
+\caption{A table containing statistics on the number of executions $(e)$, number of successful executions $(se)$ and success ratio $(sr)$ measured during the execution of the target model \texttt{Elevator}. The Java code has been generated using the default settings. The results have been measured over a time span of 30 seconds, where each entry is represented by measurements taken over 20 trials.}
+\label{table:frequency_results_elevator_default}
+\end{table}

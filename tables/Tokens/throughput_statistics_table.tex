@@ -1,0 +1,25 @@
+\begin{table}[b!]
+\centering
+\resizebox{%
+\ifdim\width>\columnwidth
+    \columnwidth
+\else
+    \width
+\fi
+}{!}{ %
+\begin{tabular}{lrrrrrr}
+\toprule
+\multicolumn{7}{c}{Log message throughput statistics for target model `\texttt{Tokens}' $(n=20, t=30)$} \\[2mm]
+Target \hspace{3.5cm} &     $N$ &  $min(e)$ &            $max(e)$ &         $median(e)$ &            $\mu(e)$ &         $\sigma(e)$ \\
+\midrule
+\texttt{A}             &  600020 &    $0.00$ & $8.36 \cdot 10^{3}$ & $1.80 \cdot 10^{3}$ & $1.51 \cdot 10^{3}$ & $6.72 \cdot 10^{2}$ \\
+\texttt{B}             &  600020 &    $0.00$ & $4.78 \cdot 10^{3}$ & $1.96 \cdot 10^{3}$ & $1.65 \cdot 10^{3}$ & $7.28 \cdot 10^{2}$ \\
+\texttt{C}             &  600020 &    $0.00$ & $4.88 \cdot 10^{3}$ & $1.82 \cdot 10^{3}$ & $1.54 \cdot 10^{3}$ & $6.83 \cdot 10^{2}$ \\
+\\[-8pt]\textit{total} &  600020 &    $0.00$ & $1.30 \cdot 10^{4}$ & $5.57 \cdot 10^{3}$ & $4.70 \cdot 10^{3}$ & $2.05 \cdot 10^{3}$ \\
+\textit{difference}    &  600020 &    $0.00$ & $8.20 \cdot 10^{3}$ & $2.08 \cdot 10^{2}$ & $2.29 \cdot 10^{2}$ & $2.78 \cdot 10^{2}$ \\
+\bottomrule
+\end{tabular}
+}
+\caption{A table containing statistics on the log messages per milliseconds $(e)$ measured during the execution of the target model \texttt{Tokens} grouped by state machine. The total and difference entries at the end of the table depict the row sum and the sum difference to the row minimum respectively. The results have been measured over a time span of 30 seconds, where each entry is represented by measurements taken over 20 trials.}
+\label{table:throughput_statistics_tokens}
+\end{table}

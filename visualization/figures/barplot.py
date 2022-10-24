@@ -118,11 +118,14 @@ def plot_two_column_barplot(
         # Create the display order.
         ordering = list(sorted(set(left_data["message"]), key=get_ordering_key))
 
+        # Find the number of categories.
+        nr_of_categories = len(set(left_data["type"]))
+
         # Set the default options for each boxplot.
         boxplot_options_left = {
             "order": ordering,
             "linewidth": 0,
-            "capsize": .15,
+            "capsize": .15 * (2 / nr_of_categories),
             "errwidth": 1
         }
         if input_boxplot_options_left is not None:
@@ -131,7 +134,7 @@ def plot_two_column_barplot(
         boxplot_options_right = {
             "order": ordering,
             "linewidth": 0,
-            "capsize": .15,
+            "capsize": .15 * (2 / nr_of_categories),
             "errwidth": 1
         }
         if input_boxplot_options_right is not None:

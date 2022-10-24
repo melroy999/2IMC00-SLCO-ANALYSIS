@@ -1,0 +1,45 @@
+\begin{table}[htbp]
+\centering
+\resizebox{%
+\ifdim\width>\columnwidth
+    \columnwidth
+\else
+    \width
+\fi
+}{!}{ %
+\begin{tabular}{lrrrrrr}
+\toprule
+\multicolumn{7}{c}{Performance results for target model `\texttt{ToadsAndFrogs}' $(n=20, t=30, \textup{Variable})$} \\[2mm]
+Target &            $\mu(e)$ &         $\sigma(e)$ &           $\mu(se)$ &        $\sigma(se)$ &            $\mu(sr)$ &         $\sigma(sr)$ \\
+\midrule
+\texttt{control.done}                 & $2.76 \cdot 10^{6}$ & $1.66 \cdot 10^{5}$ & $2.76 \cdot 10^{6}$ & $1.66 \cdot 10^{5}$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}control.done.success (p:0, id:0)  & $2.76 \cdot 10^{6}$ & $1.66 \cdot 10^{5}$ &              $2.65$ &              $2.28$ & $9.58 \cdot 10^{-7}$ & $8.33 \cdot 10^{-7}$ \\
+\hspace{3mm}control.done.failure (p:0, id:1)  & $2.76 \cdot 10^{6}$ & $1.66 \cdot 10^{5}$ & $2.76 \cdot 10^{6}$ & $1.66 \cdot 10^{5}$ &               $1.00$ &               $0.00$ \\
+\\[-8pt]\texttt{control.failure}              & $2.76 \cdot 10^{6}$ & $1.66 \cdot 10^{5}$ & $2.76 \cdot 10^{6}$ & $1.66 \cdot 10^{5}$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}control.failure.reset (p:0, id:0) & $2.76 \cdot 10^{6}$ & $1.66 \cdot 10^{5}$ & $2.76 \cdot 10^{6}$ & $1.66 \cdot 10^{5}$ &               $1.00$ &               $0.00$ \\
+\\[-8pt]\texttt{control.reset}                & $2.76 \cdot 10^{6}$ & $1.66 \cdot 10^{5}$ & $2.76 \cdot 10^{6}$ & $1.66 \cdot 10^{5}$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}control.reset.running (p:0, id:0) & $2.76 \cdot 10^{6}$ & $1.66 \cdot 10^{5}$ & $2.76 \cdot 10^{6}$ & $1.66 \cdot 10^{5}$ &               $1.00$ &               $0.00$ \\
+\\[-8pt]\texttt{control.running}              & $5.98 \cdot 10^{7}$ & $5.84 \cdot 10^{6}$ & $2.76 \cdot 10^{6}$ & $1.66 \cdot 10^{5}$ & $4.65 \cdot 10^{-2}$ & $4.62 \cdot 10^{-3}$ \\
+\hspace{3mm}control.running.done (p:0, id:0)  & $5.98 \cdot 10^{7}$ & $5.84 \cdot 10^{6}$ & $1.41 \cdot 10^{6}$ & $1.57 \cdot 10^{5}$ & $2.38 \cdot 10^{-2}$ & $3.54 \cdot 10^{-3}$ \\
+\hspace{3mm}control.running.done (p:0, id:1)  & $5.84 \cdot 10^{7}$ & $5.88 \cdot 10^{6}$ & $7.62 \cdot 10^{1}$ & $2.89 \cdot 10^{1}$ & $1.30 \cdot 10^{-6}$ & $4.69 \cdot 10^{-7}$ \\
+\hspace{3mm}control.running.done (p:0, id:2)  & $5.84 \cdot 10^{7}$ & $5.88 \cdot 10^{6}$ & $7.53 \cdot 10^{1}$ & $2.54 \cdot 10^{1}$ & $1.29 \cdot 10^{-6}$ & $4.14 \cdot 10^{-7}$ \\
+\hspace{3mm}control.running.done (p:0, id:3)  & $5.84 \cdot 10^{7}$ & $5.88 \cdot 10^{6}$ & $1.35 \cdot 10^{6}$ & $1.84 \cdot 10^{5}$ & $2.33 \cdot 10^{-2}$ & $3.38 \cdot 10^{-3}$ \\
+\hspace{3mm}control.running.done (p:0, id:4)  & $5.70 \cdot 10^{7}$ & $5.84 \cdot 10^{6}$ & $1.08 \cdot 10^{1}$ &              $4.58$ & $1.90 \cdot 10^{-7}$ & $7.89 \cdot 10^{-8}$ \\
+\\[-8pt]\texttt{control.success}              &              $2.65$ &              $2.28$ &              $2.65$ &              $2.28$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}control.success.reset (p:0, id:0) &              $2.65$ &              $2.28$ &              $2.65$ &              $2.28$ &               $1.00$ &               $0.00$ \\
+\\[-8pt]\texttt{frog.q}                       & $6.02 \cdot 10^{7}$ & $6.78 \cdot 10^{6}$ & $5.52 \cdot 10^{6}$ & $7.32 \cdot 10^{5}$ & $9.26 \cdot 10^{-2}$ & $1.38 \cdot 10^{-2}$ \\
+\hspace{3mm}frog.q.q (p:0, id:0)              & $6.02 \cdot 10^{7}$ & $6.78 \cdot 10^{6}$ & $4.05 \cdot 10^{6}$ & $5.44 \cdot 10^{5}$ & $6.80 \cdot 10^{-2}$ & $1.02 \cdot 10^{-2}$ \\
+\hspace{3mm}frog.q.q (p:0, id:1)              & $5.61 \cdot 10^{7}$ & $6.80 \cdot 10^{6}$ & $1.35 \cdot 10^{6}$ & $1.84 \cdot 10^{5}$ & $2.43 \cdot 10^{-2}$ & $3.92 \cdot 10^{-3}$ \\
+\hspace{3mm}frog.q.q (p:0, id:2)              & $5.48 \cdot 10^{7}$ & $6.81 \cdot 10^{6}$ & $1.18 \cdot 10^{5}$ & $4.82 \cdot 10^{4}$ & $2.18 \cdot 10^{-3}$ & $9.23 \cdot 10^{-4}$ \\
+\hspace{3mm}frog.q.q (p:0, id:3)              & $5.46 \cdot 10^{7}$ & $6.81 \cdot 10^{6}$ & $3.50 \cdot 10^{1}$ & $1.13 \cdot 10^{1}$ & $6.50 \cdot 10^{-7}$ & $2.19 \cdot 10^{-7}$ \\
+\\[-8pt]\texttt{toad.q}                       & $6.31 \cdot 10^{7}$ & $4.79 \cdot 10^{6}$ & $5.76 \cdot 10^{6}$ & $6.26 \cdot 10^{5}$ & $9.19 \cdot 10^{-2}$ & $1.28 \cdot 10^{-2}$ \\
+\hspace{3mm}toad.q.q (p:0, id:0)              & $6.31 \cdot 10^{7}$ & $4.79 \cdot 10^{6}$ & $4.22 \cdot 10^{6}$ & $4.57 \cdot 10^{5}$ & $6.73 \cdot 10^{-2}$ & $9.18 \cdot 10^{-3}$ \\
+\hspace{3mm}toad.q.q (p:0, id:1)              & $5.88 \cdot 10^{7}$ & $4.89 \cdot 10^{6}$ & $1.41 \cdot 10^{6}$ & $1.57 \cdot 10^{5}$ & $2.42 \cdot 10^{-2}$ & $3.64 \cdot 10^{-3}$ \\
+\hspace{3mm}toad.q.q (p:0, id:2)              & $5.74 \cdot 10^{7}$ & $4.94 \cdot 10^{6}$ & $1.26 \cdot 10^{5}$ & $4.46 \cdot 10^{4}$ & $2.24 \cdot 10^{-3}$ & $9.05 \cdot 10^{-4}$ \\
+\hspace{3mm}toad.q.q (p:0, id:3)              & $5.73 \cdot 10^{7}$ & $4.96 \cdot 10^{6}$ & $3.41 \cdot 10^{1}$ & $1.22 \cdot 10^{1}$ & $5.99 \cdot 10^{-7}$ & $2.28 \cdot 10^{-7}$ \\
+\bottomrule
+\end{tabular}
+}
+\caption{A table containing statistics on the number of executions $(e)$, number of successful executions $(se)$ and success ratio $(sr)$ measured during the execution of the target model \texttt{ToadsAndFrogs}. The Java code has been generated with the `Variable' locking mode enabled. The results have been measured over a time span of 30 seconds, where each entry is represented by measurements taken over 20 trials.}
+\label{table:frequency_results_toadsandfrogs_variable}
+\end{table}

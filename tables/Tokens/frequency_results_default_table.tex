@@ -1,0 +1,47 @@
+\begin{table}[htbp]
+\centering
+\resizebox{%
+\ifdim\width>\columnwidth
+    \columnwidth
+\else
+    \width
+\fi
+}{!}{ %
+\begin{tabular}{lrrrrrr}
+\toprule
+\multicolumn{7}{c}{Performance results for target model `\texttt{Tokens}' $(n=20, t=30, \textup{Default})$} \\[2mm]
+Target &            $\mu(e)$ &         $\sigma(e)$ &           $\mu(se)$ &        $\sigma(se)$ &            $\mu(sr)$ &         $\sigma(sr)$ \\
+\midrule
+\texttt{A.act}                & $4.55 \cdot 10^{7}$ & $6.79 \cdot 10^{6}$ & $4.55 \cdot 10^{7}$ & $6.79 \cdot 10^{6}$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}A.act.act (p:0, id:0)     & $4.55 \cdot 10^{7}$ & $6.79 \cdot 10^{6}$ & $3.20 \cdot 10^{6}$ & $5.81 \cdot 10^{5}$ & $7.02 \cdot 10^{-2}$ & $6.53 \cdot 10^{-3}$ \\
+\hspace{3mm}A.act.update (p:1, id:1)  & $4.23 \cdot 10^{7}$ & $6.30 \cdot 10^{6}$ & $3.81 \cdot 10^{7}$ & $5.66 \cdot 10^{6}$ & $9.00 \cdot 10^{-1}$ & $3.42 \cdot 10^{-8}$ \\
+\hspace{3mm}A.act.wait (p:1, id:2)    & $4.24 \cdot 10^{6}$ & $6.31 \cdot 10^{5}$ & $4.24 \cdot 10^{6}$ & $6.31 \cdot 10^{5}$ &               $1.00$ &               $0.00$ \\
+\\[-8pt]\texttt{A.update}             & $4.23 \cdot 10^{7}$ & $6.30 \cdot 10^{6}$ & $4.23 \cdot 10^{7}$ & $6.30 \cdot 10^{6}$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}A.update.act (p:0, id:0)  & $4.23 \cdot 10^{7}$ & $6.30 \cdot 10^{6}$ & $4.23 \cdot 10^{7}$ & $6.30 \cdot 10^{6}$ &               $1.00$ &               $0.00$ \\
+\\[-8pt]\texttt{A.wait}               & $1.91 \cdot 10^{7}$ & $2.58 \cdot 10^{6}$ & $5.17 \cdot 10^{6}$ & $6.59 \cdot 10^{5}$ & $2.75 \cdot 10^{-1}$ & $4.87 \cdot 10^{-2}$ \\
+\hspace{3mm}A.wait.wait (p:0, id:0)   & $1.91 \cdot 10^{7}$ & $2.58 \cdot 10^{6}$ & $9.32 \cdot 10^{5}$ & $1.43 \cdot 10^{5}$ & $4.92 \cdot 10^{-2}$ & $7.25 \cdot 10^{-3}$ \\
+\hspace{3mm}A.wait.update (p:1, id:1) & $1.82 \cdot 10^{7}$ & $2.51 \cdot 10^{6}$ & $4.24 \cdot 10^{6}$ & $6.31 \cdot 10^{5}$ & $2.38 \cdot 10^{-1}$ & $4.87 \cdot 10^{-2}$ \\
+\\[-8pt]\texttt{B.act}                & $6.46 \cdot 10^{7}$ & $6.43 \cdot 10^{6}$ & $6.46 \cdot 10^{7}$ & $6.43 \cdot 10^{6}$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}B.act.act (p:0, id:0)     & $6.46 \cdot 10^{7}$ & $6.43 \cdot 10^{6}$ & $3.46 \cdot 10^{6}$ & $6.70 \cdot 10^{5}$ & $5.35 \cdot 10^{-2}$ & $7.87 \cdot 10^{-3}$ \\
+\hspace{3mm}B.act.update (p:1, id:1)  & $6.12 \cdot 10^{7}$ & $6.04 \cdot 10^{6}$ & $5.51 \cdot 10^{7}$ & $5.43 \cdot 10^{6}$ & $9.00 \cdot 10^{-1}$ & $4.24 \cdot 10^{-8}$ \\
+\hspace{3mm}B.act.wait (p:1, id:2)    & $6.13 \cdot 10^{6}$ & $6.05 \cdot 10^{5}$ & $6.13 \cdot 10^{6}$ & $6.05 \cdot 10^{5}$ &               $1.00$ &               $0.00$ \\
+\\[-8pt]\texttt{B.update}             & $6.12 \cdot 10^{7}$ & $6.04 \cdot 10^{6}$ & $6.12 \cdot 10^{7}$ & $6.04 \cdot 10^{6}$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}B.update.act (p:0, id:0)  & $6.12 \cdot 10^{7}$ & $6.04 \cdot 10^{6}$ & $6.12 \cdot 10^{7}$ & $6.04 \cdot 10^{6}$ &               $1.00$ &               $0.00$ \\
+\\[-8pt]\texttt{B.wait}               & $2.61 \cdot 10^{7}$ & $5.17 \cdot 10^{6}$ & $6.91 \cdot 10^{6}$ & $6.00 \cdot 10^{5}$ & $2.73 \cdot 10^{-1}$ & $5.28 \cdot 10^{-2}$ \\
+\hspace{3mm}B.wait.wait (p:0, id:0)   & $2.61 \cdot 10^{7}$ & $5.17 \cdot 10^{6}$ & $7.80 \cdot 10^{5}$ & $1.12 \cdot 10^{5}$ & $3.07 \cdot 10^{-2}$ & $6.03 \cdot 10^{-3}$ \\
+\hspace{3mm}B.wait.update (p:1, id:1) & $2.53 \cdot 10^{7}$ & $5.15 \cdot 10^{6}$ & $6.13 \cdot 10^{6}$ & $6.05 \cdot 10^{5}$ & $2.50 \cdot 10^{-1}$ & $5.16 \cdot 10^{-2}$ \\
+\\[-8pt]\texttt{C.act}                & $4.57 \cdot 10^{7}$ & $6.55 \cdot 10^{6}$ & $4.57 \cdot 10^{7}$ & $6.55 \cdot 10^{6}$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}C.act.act (p:0, id:0)     & $4.57 \cdot 10^{7}$ & $6.55 \cdot 10^{6}$ & $4.42 \cdot 10^{6}$ & $4.73 \cdot 10^{5}$ & $9.75 \cdot 10^{-2}$ & $8.61 \cdot 10^{-3}$ \\
+\hspace{3mm}C.act.wait (p:1, id:1)    & $4.12 \cdot 10^{7}$ & $6.18 \cdot 10^{6}$ & $4.13 \cdot 10^{6}$ & $6.19 \cdot 10^{5}$ & $1.00 \cdot 10^{-1}$ & $9.38 \cdot 10^{-8}$ \\
+\hspace{3mm}C.act.update (p:1, id:2)  & $3.71 \cdot 10^{7}$ & $5.56 \cdot 10^{6}$ & $3.71 \cdot 10^{7}$ & $5.56 \cdot 10^{6}$ &               $1.00$ &               $0.00$ \\
+\\[-8pt]\texttt{C.update}             & $4.12 \cdot 10^{7}$ & $6.18 \cdot 10^{6}$ & $4.12 \cdot 10^{7}$ & $6.18 \cdot 10^{6}$ &               $1.00$ &               $0.00$ \\
+\hspace{3mm}C.update.act (p:0, id:0)  & $4.12 \cdot 10^{7}$ & $6.18 \cdot 10^{6}$ & $4.12 \cdot 10^{7}$ & $6.18 \cdot 10^{6}$ &               $1.00$ &               $0.00$ \\
+\\[-8pt]\texttt{C.wait}               & $1.85 \cdot 10^{7}$ & $2.64 \cdot 10^{6}$ & $5.84 \cdot 10^{6}$ & $7.54 \cdot 10^{5}$ & $3.20 \cdot 10^{-1}$ & $4.43 \cdot 10^{-2}$ \\
+\hspace{3mm}C.wait.wait (p:0, id:0)   & $1.85 \cdot 10^{7}$ & $2.64 \cdot 10^{6}$ & $1.71 \cdot 10^{6}$ & $2.32 \cdot 10^{5}$ & $9.30 \cdot 10^{-2}$ & $7.54 \cdot 10^{-3}$ \\
+\hspace{3mm}C.wait.update (p:1, id:1) & $1.68 \cdot 10^{7}$ & $2.45 \cdot 10^{6}$ & $4.13 \cdot 10^{6}$ & $6.19 \cdot 10^{5}$ & $2.50 \cdot 10^{-1}$ & $4.49 \cdot 10^{-2}$ \\
+\bottomrule
+\end{tabular}
+}
+\caption{A table containing statistics on the number of executions $(e)$, number of successful executions $(se)$ and success ratio $(sr)$ measured during the execution of the target model \texttt{Tokens}. The Java code has been generated using the default settings. The results have been measured over a time span of 30 seconds, where each entry is represented by measurements taken over 20 trials.}
+\label{table:frequency_results_tokens_default}
+\end{table}

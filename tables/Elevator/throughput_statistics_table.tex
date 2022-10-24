@@ -1,0 +1,25 @@
+\begin{table}[b!]
+\centering
+\resizebox{%
+\ifdim\width>\columnwidth
+    \columnwidth
+\else
+    \width
+\fi
+}{!}{ %
+\begin{tabular}{lrrrrrr}
+\toprule
+\multicolumn{7}{c}{Log message throughput statistics for target model `\texttt{Elevator}' $(n=20, t=30)$} \\[2mm]
+Target \hspace{3.5cm} &     $N$ &  $min(e)$ &            $max(e)$ &         $median(e)$ &            $\mu(e)$ &         $\sigma(e)$ \\
+\midrule
+\texttt{cabin}         &  600040 &    $0.00$ & $6.87 \cdot 10^{3}$ & $1.80 \cdot 10^{3}$ & $1.54 \cdot 10^{3}$ & $6.46 \cdot 10^{2}$ \\
+\texttt{controller}    &  600040 &    $0.00$ & $8.07 \cdot 10^{3}$ & $1.77 \cdot 10^{3}$ & $1.52 \cdot 10^{3}$ & $6.37 \cdot 10^{2}$ \\
+\texttt{environment}   &  600040 &    $0.00$ & $8.54 \cdot 10^{3}$ & $1.82 \cdot 10^{3}$ & $1.57 \cdot 10^{3}$ & $6.55 \cdot 10^{2}$ \\
+\\[-8pt]\textit{total} &  600040 &    $0.00$ & $1.27 \cdot 10^{4}$ & $5.40 \cdot 10^{3}$ & $4.63 \cdot 10^{3}$ & $1.91 \cdot 10^{3}$ \\
+\textit{difference}    &  600040 &    $0.00$ & $8.53 \cdot 10^{3}$ & $1.25 \cdot 10^{2}$ & $1.64 \cdot 10^{2}$ & $2.51 \cdot 10^{2}$ \\
+\bottomrule
+\end{tabular}
+}
+\caption{A table containing statistics on the log messages per milliseconds $(e)$ measured during the execution of the target model \texttt{Elevator} grouped by state machine. The total and difference entries at the end of the table depict the row sum and the sum difference to the row minimum respectively. The results have been measured over a time span of 30 seconds, where each entry is represented by measurements taken over 20 trials.}
+\label{table:throughput_statistics_elevator}
+\end{table}

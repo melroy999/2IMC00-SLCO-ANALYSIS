@@ -1,0 +1,24 @@
+\begin{table}[b!]
+\centering
+\resizebox{%
+\ifdim\width>\columnwidth
+    \columnwidth
+\else
+    \width
+\fi
+}{!}{ %
+\begin{tabular}{lrrrrrr}
+\toprule
+\multicolumn{7}{c}{Log message throughput statistics for target model `\texttt{CounterDistributor}' $(n=20, t=30)$} \\[2mm]
+Target \hspace{3.5cm} &     $N$ &  $min(e)$ &            $max(e)$ &         $median(e)$ &            $\mu(e)$ &         $\sigma(e)$ \\
+\midrule
+\texttt{Counter}       &  600020 &    $0.00$ & $2.87 \cdot 10^{3}$ & $4.64 \cdot 10^{2}$ & $4.66 \cdot 10^{2}$ & $9.62 \cdot 10^{1}$ \\
+\texttt{Distributor}   &  600020 &    $0.00$ & $7.47 \cdot 10^{3}$ & $3.47 \cdot 10^{3}$ & $3.40 \cdot 10^{3}$ & $5.26 \cdot 10^{2}$ \\
+\\[-8pt]\textit{total} &  600020 &    $0.00$ & $8.65 \cdot 10^{3}$ & $3.94 \cdot 10^{3}$ & $3.87 \cdot 10^{3}$ & $5.94 \cdot 10^{2}$ \\
+\textit{difference}    &  600020 &    $0.00$ & $6.48 \cdot 10^{3}$ & $2.99 \cdot 10^{3}$ & $2.94 \cdot 10^{3}$ & $4.63 \cdot 10^{2}$ \\
+\bottomrule
+\end{tabular}
+}
+\caption{A table containing statistics on the log messages per milliseconds $(e)$ measured during the execution of the target model \texttt{CounterDistributor} grouped by state machine. The total and difference entries at the end of the table depict the row sum and the sum difference to the row minimum respectively. The results have been measured over a time span of 30 seconds, where each entry is represented by measurements taken over 20 trials.}
+\label{table:throughput_statistics_counterdistributor}
+\end{table}

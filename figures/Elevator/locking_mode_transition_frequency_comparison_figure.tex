@@ -1,0 +1,13 @@
+\begin{figure}[h!]
+\centering
+\begin{minipage}{1\textwidth}
+  \centering
+  \makebox[\textwidth][c]{ %
+        \resizebox{1.19\textwidth}{!}{ %
+            \input{figures/Elevator/locking_mode_transition_frequency_comparison_plot.pgf}
+        }%
+    }%
+\end{minipage}
+\caption{A bar plot that reports the number of successful executions $(se)$ and the percentage of successful executions $(sr)$ for each decision node and transition in the target model \texttt{Elevator}, where the results are grouped by the locking mode. Observe that the success count is depicted in a logarithmic scale, due to the wide range of measured values: the first column adheres to a linear scale; all subsequent columns are logarithmic. The results have been measured over a time span of 30 seconds, where each entry is represented by measurements taken over 20 trials.}
+\label{figure:locking_mode_transition_frequency_comparison_elevator}
+\end{figure}
